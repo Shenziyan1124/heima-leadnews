@@ -1,0 +1,40 @@
+# Maven 构建产物
+target/
+*.class
+
+# IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# 日志文件
+*.log
+logs/
+
+# 本地配置文件(含密码、密钥等敏感信息)
+*.local.properties
+application-local.yml
+application-local.yaml
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 依赖目录
+node_modules/
+
+# 打包输出
+*.jar
+*.war
+*.zip
