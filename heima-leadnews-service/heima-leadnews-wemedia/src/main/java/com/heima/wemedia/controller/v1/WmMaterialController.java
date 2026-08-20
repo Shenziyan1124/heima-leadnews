@@ -48,7 +48,7 @@ public class WmMaterialController {
         return wmMaterialService.cancelCollect(id);
     }
 
-    @GetMapping("/collect/{id} ")
+    @GetMapping("/collect/{id}")
     @ApiOperation(value = "收藏图片", notes = "收藏图片")
     public ResponseResult collect(@PathVariable("id") Integer id) {
         return wmMaterialService.collect(id);

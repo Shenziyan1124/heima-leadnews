@@ -11,8 +11,12 @@ import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.wemedia.dtos.WmMaterialPageDto;
 import com.heima.model.wemedia.pojos.WmMaterial;
+import com.heima.model.wemedia.pojos.WmNews;
+import com.heima.model.wemedia.pojos.WmNewsMaterial;
 import com.heima.utils.thread.WmThreadLocalUtil;
 import com.heima.wemedia.mapper.WmMaterialMapper;
+import com.heima.wemedia.mapper.WmNewsMapper;
+import com.heima.wemedia.mapper.WmNewsMaterialMapper;
 import com.heima.wemedia.service.WmMaterialService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +38,9 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private WmNewsMaterialMapper WmNewsMaterialMapper;
 
     /**
      * 上传图片
@@ -86,6 +93,7 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
     @Override
     public ResponseResult listMaterial(WmMaterialPageDto dto) {
 
+
         Integer userId = WmThreadLocalUtil.getUser().getId();
         if (userId == null)
             return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
@@ -130,16 +138,28 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
      */
     @Override
     public ResponseResult delPicture(Integer id) {
+        if (id == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID,"参数无效");
+        }
         WmMaterial wmMaterial = getById(id);
-        if (wmMaterial == null)
+        if (wmMaterial == null){
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "数据不存在");
+        }
+
+        LambdaQueryWrapper<WmNewsMaterial> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(WmNewsMaterial::getMaterialId, id);
+        Integer count = WmNewsMaterialMapper.selectCount(wrapper);
+        if (count > 0){
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_EXIST, "素材已被文章引用，不能删除");
+        }
+
 
         // 删除图片
         fileStorageService.delete(wmMaterial.getUrl());
-
         // 删除数据库记录
-        removeById(id);
-        return null;
+       removeById(id);
+       return  ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+        //return null;
     }
 
     /**
@@ -150,13 +170,19 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
      */
     @Override
     public ResponseResult cancelCollect(Integer id) {
+        if (id == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID,"参数无效");
+        }
+
         WmMaterial wmMaterial = getById(id);
         if (wmMaterial == null)
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "数据不存在");
 
+        // 取消收藏
         wmMaterial.setIsCollection(WmMaterialConstants.NOT_COLLECTED);
         updateById(wmMaterial);
-        return null;
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 
     /**
@@ -167,13 +193,19 @@ public class WmMaterialServiceImpl extends ServiceImpl<WmMaterialMapper, WmMater
      */
     @Override
     public ResponseResult collect(Integer id) {
+        if (id == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID,"参数无效");
+        }
+
         WmMaterial wmMaterial = getById(id);
         if (wmMaterial == null)
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "数据不存在");
 
+        // 收藏
         wmMaterial.setIsCollection(WmMaterialConstants.COLLECTED);
         updateById(wmMaterial);
-        return null;
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 
 }
