@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/article")
 @RequiredArgsConstructor
-@Api(tags = "文章")
+@Api(tags = "app端-文章列表")
 public class ArticleHomeController {
 
     private final ApArticleService apArticleService;
