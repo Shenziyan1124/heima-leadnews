@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
      * @param id 文章id
      */
     @Override
+    @Async // 异步处理 标明当前方法是一个异步的
     public void autoScanWmNews(Integer id) {
         // 1. 根据id查询自媒体文章
         WmNews wmNews = wmNewsMapper.selectById(id);
@@ -75,7 +77,7 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
             }
 
             wmNews.setArticleId((Long) responseResult.getData());
-            updateWmNews(wmNews, WmNews.Status.SUCCESS.getCode(), "文章审核成功");
+            updateWmNews(wmNews, WmNews.Status.PUBLISHED.getCode(), "文章审核成功");
             log.info("WmNewsAutoScanServiceImpl-autoScanWmNews-文章审核成功，文章id：{}", wmNews.getId());
         }
 
@@ -140,20 +142,20 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
         }
 
         // 审核图片
-        try {
-            Map map = greenImageScan.imageScan(imageList);
-            if (map != null && map.get("suggestion").equals("block")) {
-                flag = false;
-                updateWmNews(wmNews, WmNews.Status.FAIL.getCode(), "当前文章有违规图片");
-            }
-            if (map != null && map.get("suggestion").equals("review")) {
-                flag = false;
-                updateWmNews(wmNews, WmNews.Status.ADMIN_AUTH.getCode(), "当前文章有违规图片");
-            }
-        } catch (Exception e) {
-            flag = false;
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Map map = greenImageScan.imageScan(imageList);
+//            if (map != null && map.get("suggestion").equals("block")) {
+//                flag = false;
+//                updateWmNews(wmNews, WmNews.Status.FAIL.getCode(), "当前文章有违规图片");
+//            }
+//            if (map != null && map.get("suggestion").equals("review")) {
+//                flag = false;
+//                updateWmNews(wmNews, WmNews.Status.ADMIN_AUTH.getCode(), "当前文章有违规图片");
+//            }
+//        } catch (Exception e) {
+//            flag = false;
+//            throw new RuntimeException(e);
+//        }
 
 
         return flag;
@@ -174,27 +176,27 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
         if (StringUtils.isBlank(wmNews.getTitle() + "-" + content)) return flag;
 
 
-        try {
-            Map map = greenTextScan.greeTextScan(wmNews.getTitle() + "-" + content);
-            if (map != null) {
-
-                // 审核失败
-                if (map.get("suggestion").equals("block")) {
-                    flag = false;
-                    updateWmNews(wmNews, WmNews.Status.FAIL.getCode(), "当前文章有违规信息");
-                }
-
-                // 人工审核
-                if (map.get("suggestion").equals("review")) {
-                    flag = false;
-                    updateWmNews(wmNews, WmNews.Status.ADMIN_AUTH.getCode(), "当前文章需要人工审核");
-                }
-
-            }
-        } catch (Exception e) {
-            flag = false;
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Map map = greenTextScan.greeTextScan(wmNews.getTitle() + "-" + content);
+//            if (map != null) {
+//
+//                // 审核失败
+//                if (map.get("suggestion").equals("block")) {
+//                    flag = false;
+//                    updateWmNews(wmNews, WmNews.Status.FAIL.getCode(), "当前文章有违规信息");
+//                }
+//
+//                // 人工审核
+//                if (map.get("suggestion").equals("review")) {
+//                    flag = false;
+//                    updateWmNews(wmNews, WmNews.Status.ADMIN_AUTH.getCode(), "当前文章需要人工审核");
+//                }
+//
+//            }
+//        } catch (Exception e) {
+//            flag = false;
+//            throw new RuntimeException(e);
+//        }
 
         return flag;
     }
