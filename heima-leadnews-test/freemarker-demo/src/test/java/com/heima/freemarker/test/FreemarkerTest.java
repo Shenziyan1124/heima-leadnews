@@ -6,6 +6,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.RequiredArgsConstructor;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+@Ignore("需要启动应用才能运行")
 @SpringBootTest(classes = FreemarkerDemoApplication.class)
 @RunWith(SpringRunner.class)
 @RequiredArgsConstructor

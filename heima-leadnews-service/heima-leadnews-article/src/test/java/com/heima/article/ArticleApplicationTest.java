@@ -15,6 +15,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import lombok.RequiredArgsConstructor;
 import org.jcodings.util.Hash;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+@Ignore("需要启动数据库和Minio才能运行")
 @SpringBootTest(classes = ArticleApplication.class)
 @RunWith(SpringRunner.class)
 public class ArticleApplicationTest {

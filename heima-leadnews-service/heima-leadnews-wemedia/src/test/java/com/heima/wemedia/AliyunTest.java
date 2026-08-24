@@ -3,6 +3,7 @@ package com.heima.wemedia;
 import com.heima.common.aliyun.GreenImageScan;
 import com.heima.common.aliyun.GreenTextScan;
 import com.heima.file.service.FileStorageService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 
+@Ignore("需要启动数据库和阿里云服务才能运行")
 @SpringBootTest(classes = com.heima.wemedia.WemediaApplication.class)
 @RunWith(SpringRunner.class) // 指定JUnit测试 runner
 public class AliyunTest {

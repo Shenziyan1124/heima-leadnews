@@ -22,6 +22,7 @@ import com.heima.wemedia.mapper.WmSensitiveMapper;
 import com.heima.wemedia.mapper.WmUserMapper;
 import com.heima.wemedia.service.WmChannelService;
 import com.heima.wemedia.service.WmNewsAutoScanService;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.TesseractException;
@@ -63,7 +64,8 @@ public class WmNewsAutoScanServiceImpl implements WmNewsAutoScanService {
      * @param id 文章id
      */
     @Override
-    @Async // 异步处理 标明当前方法是一个异步的
+    //@Async // 异步处理 标明当前方法是一个异步的
+    @GlobalTransactional
     public void autoScanWmNews(Integer id) {
         // 1. 根据id查询自媒体文章
         WmNews wmNews = wmNewsMapper.selectById(id);
