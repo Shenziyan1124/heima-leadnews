@@ -26,6 +26,7 @@ import com.heima.wemedia.mapper.WmNewsMaterialMapper;
 import com.heima.wemedia.service.WmMaterialService;
 import com.heima.wemedia.service.WmNewsAutoScanService;
 import com.heima.wemedia.service.WmNewsService;
+import com.heima.wemedia.service.WmNewsTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -51,6 +52,9 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
 
     @Autowired
     private WmNewsAutoScanService wmNewsAutoScanService;
+
+    @Autowired
+    private WmNewsTaskService wmNewsTaskService;
 
     /**
      * 查询文章列表
@@ -140,8 +144,8 @@ public class WmNewsServiceImpl extends ServiceImpl<WmNewsMapper, WmNews> impleme
         saveRelativeInfoForCover(wmNews, dto, images);
 
         // 5.提交文章进行自动审核
-        wmNewsAutoScanService.autoScanWmNews(wmNews.getId());
-
+        //wmNewsAutoScanService.autoScanWmNews(wmNews.getId());
+        wmNewsTaskService.addNewsTask(wmNews.getId(), dto.getPublishTime());
         // 1.判断是否包含文章id
         // 2.包含--是修改
         // 2.1 删除文章图片与素材的关系
