@@ -97,31 +97,27 @@ public class TaskServiceImpl implements TaskService {
      */
     private boolean addTaskToDb(Task task) {
 
-        boolean flag = false;
-        try {
-            // 保存任务表
-            Taskinfo taskinfo = new Taskinfo();
-            BeanUtils.copyProperties(task, taskinfo);
-            taskinfo.setExecuteTime(new Date(task.getExecuteTime()));
-            taskinfoMapper.insert(taskinfo);
+        // 保存任务表
+        Taskinfo taskinfo = new Taskinfo();
+        BeanUtils.copyProperties(task, taskinfo);
+        taskinfo.setExecuteTime(new Date(task.getExecuteTime()));
+        log.info("插入taskinfo前: taskId={}", taskinfo.getTaskId());
+        taskinfoMapper.insert(taskinfo);
+        log.info("插入taskinfo后: taskId={}", taskinfo.getTaskId());
 
-            // 设置任务id
-            task.setTaskId(taskinfo.getTaskId());
+        // 设置任务id
+        task.setTaskId(taskinfo.getTaskId());
 
-            // 保存任务日志表
-            TaskinfoLogs taskinfoLogs = new TaskinfoLogs();
-            BeanUtils.copyProperties(taskinfo, taskinfoLogs);
-            taskinfoLogs.setVersion(1);
-            taskinfoLogs.setStatus(ScheduleConstants.SCHEDULED);
-            taskinfoLogsMapper.insert(taskinfoLogs);
+        // 保存任务日志表
+        TaskinfoLogs taskinfoLogs = new TaskinfoLogs();
+        BeanUtils.copyProperties(taskinfo, taskinfoLogs);
+        taskinfoLogs.setVersion(1);
+        taskinfoLogs.setStatus(ScheduleConstants.SCHEDULED);
+        log.info("插入taskinfoLogs前: taskId={}", taskinfoLogs.getTaskId());
+        taskinfoLogsMapper.insert(taskinfoLogs);
+        log.info("插入taskinfoLogs后: taskId={}", taskinfoLogs.getTaskId());
 
-            flag = true;
-
-        } catch (Exception e) {
-            log.error("任务添加失败", e);
-        }
-
-        return flag;
+        return true;
     }
 
     /**

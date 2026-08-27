@@ -55,7 +55,7 @@ public class WmNewsTaskServiceImpl implements WmNewsTaskService {
      * 自动拉取 审核文章
      */
     @Autowired
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 10000)
     public void scanNewsByTask() {
         log.info("消费任务 审核文章");
 

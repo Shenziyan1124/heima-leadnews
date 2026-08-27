@@ -9,4 +9,9 @@ public interface WmNewsTaskService {
      * @param publishTime 发布时间,可以作为任务的执行时间
      */
     public void addNewsTask(Integer id, Date publishTime);
+
+    /**
+     * 自动拉取审核文章
+     */
+    public void scanNewsByTask();
 }
