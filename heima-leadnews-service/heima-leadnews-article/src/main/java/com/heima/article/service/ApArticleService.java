@@ -24,4 +24,11 @@ public interface ApArticleService extends IService<ApArticle> {
      */
 
     ResponseResult saveArticle(ArticleDto dto);
+
+    /**
+     * 根据频道id获取文章数量
+     * @param id
+     * @return
+     */
+    ResponseResult getArticleCountByChannelId(Integer id);
 }

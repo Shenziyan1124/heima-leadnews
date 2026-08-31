@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -141,5 +142,17 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
 
         // 3.结果返回 文章的id
         return ResponseResult.okResult(apArticle.getId());
+    }
+
+    /**
+     * 根据频道id获取文章数量
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public ResponseResult getArticleCountByChannelId(Integer id) {
+        int count = lambdaQuery().eq(ApArticle::getChannelId, id).count();
+        return ResponseResult.okResult(count);
     }
 }

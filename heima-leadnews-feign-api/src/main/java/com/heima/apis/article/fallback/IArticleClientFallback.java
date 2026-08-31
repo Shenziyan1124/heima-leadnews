@@ -24,6 +24,12 @@ public class IArticleClientFallback implements FallbackFactory<IArticleClient> {
                 log.error("调用 article 服务失败: {}", dto.toString(), cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
             }
+
+            @Override
+            public ResponseResult getArticleCountByChannelId(Integer id) {
+                log.error("wemedia 调用 article-getArticleCountByChannelId 服务失败: {}", id);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
+            }
         };
     }
 
