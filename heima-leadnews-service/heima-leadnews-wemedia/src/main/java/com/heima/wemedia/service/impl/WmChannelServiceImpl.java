@@ -11,7 +11,7 @@ import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.wemedia.dtos.WmChannelDto;
-import com.heima.model.wemedia.dtos.WmChannelslistDto;
+import com.heima.model.wemedia.dtos.WmChannelListDto;
 import com.heima.model.wemedia.pojos.WmChannel;
 import com.heima.wemedia.mapper.WmChannelMapper;
 import com.heima.wemedia.service.WmChannelService;
@@ -49,7 +49,7 @@ public class WmChannelServiceImpl extends ServiceImpl<WmChannelMapper, WmChannel
      * @return
      */
     @Override
-    public ResponseResult filterList(WmChannelslistDto dto) {
+    public ResponseResult filterList(WmChannelListDto dto) {
         // 1. 参数判断
         if (dto == null)
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);

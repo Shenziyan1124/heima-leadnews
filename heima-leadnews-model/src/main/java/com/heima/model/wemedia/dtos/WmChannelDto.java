@@ -9,7 +9,7 @@ import java.util.Date;
 @Data
 @ApiModel(description = "频道信息")
 public class WmChannelDto {
-    private Integer id;
+    private Long id;
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
     @ApiModelProperty(value = "描述")

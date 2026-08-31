@@ -2,7 +2,7 @@ package com.heima.wemedia.controller.v1;
 
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmChannelDto;
-import com.heima.model.wemedia.dtos.WmChannelslistDto;
+import com.heima.model.wemedia.dtos.WmChannelListDto;
 import com.heima.wemedia.service.WmChannelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/channel")
 @RequiredArgsConstructor
 @Api(tags = "频道管理")
-public class WmchannelController {
+public class WmChannelController {
 
     private final WmChannelService wmChannelService;
 
@@ -25,7 +25,7 @@ public class WmchannelController {
 
     @ApiOperation(value = "频道名称模糊分页查询")
     @PostMapping("/list")
-    public ResponseResult filterList(@RequestBody WmChannelslistDto dto) {
+    public ResponseResult filterList(@RequestBody WmChannelListDto dto) {
         return wmChannelService.filterList(dto);
     }
 

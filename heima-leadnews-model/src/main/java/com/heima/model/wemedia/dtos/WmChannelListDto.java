@@ -6,8 +6,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value = "WmChannelslistDto", description = "频道列表查询")
-public class WmChannelslistDto extends PageRequestDto {
+@ApiModel(value = "WmChannelListDto", description = "频道列表查询")
+public class WmChannelListDto extends PageRequestDto {
 
     @ApiModelProperty(value = "频道名称")
     private String name;

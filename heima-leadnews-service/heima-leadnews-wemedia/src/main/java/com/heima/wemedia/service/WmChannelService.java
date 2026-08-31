@@ -3,7 +3,7 @@ package com.heima.wemedia.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmChannelDto;
-import com.heima.model.wemedia.dtos.WmChannelslistDto;
+import com.heima.model.wemedia.dtos.WmChannelListDto;
 import com.heima.model.wemedia.pojos.WmChannel;
 
 public interface WmChannelService extends IService<WmChannel> {
@@ -18,7 +18,7 @@ public interface WmChannelService extends IService<WmChannel> {
      * @param dto
      * @return
      */
-    ResponseResult filterList(WmChannelslistDto dto);
+    ResponseResult filterList(WmChannelListDto dto);
 
     /**
      * 新增或修改频道
