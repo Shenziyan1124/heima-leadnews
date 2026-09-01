@@ -1,5 +1,6 @@
 package com.heima.wemedia.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heima.model.common.dtos.ResponseResult;
@@ -9,14 +10,19 @@ import com.heima.model.wemedia.pojos.WmUser;
 import com.heima.utils.common.AppJwtUtil;
 import com.heima.wemedia.mapper.WmUserMapper;
 import com.heima.wemedia.service.WmUserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
+@Transactional
 public class WmUserServiceImpl extends ServiceImpl<WmUserMapper, WmUser> implements WmUserService {
 
     @Override
@@ -48,5 +54,37 @@ public class WmUserServiceImpl extends ServiceImpl<WmUserMapper, WmUser> impleme
         }else {
             return ResponseResult.errorResult(AppHttpCodeEnum.LOGIN_PASSWORD_ERROR);
         }
+    }
+
+    /**
+     * 创建自媒体用户
+     *
+     * @param wmUser
+     * @return
+     */
+    @Override
+    public ResponseResult createWmUser(WmUser wmUser) {
+        log.info("接收Feign请求: wmUser={}", wmUser);
+
+        // 1.检查用户是否存在
+        LambdaQueryWrapper<WmUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(WmUser::getName, wmUser.getName());
+        int count = count(queryWrapper);
+        log.info("查询用户数量: count={}", count);
+
+        if (count > 0){
+            log.info("用户已存在，返回DATA_EXIST");
+            ResponseResult result = ResponseResult.errorResult(AppHttpCodeEnum.DATA_EXIST, "用户已存在");
+            log.info("返回结果: {}", result);
+            return result;
+        }
+
+        // 2.保存用户
+        WmUser user = new WmUser();
+        BeanUtils.copyProperties(wmUser, user);
+        log.info("保存用户: user={}", user);
+        save(user);
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }

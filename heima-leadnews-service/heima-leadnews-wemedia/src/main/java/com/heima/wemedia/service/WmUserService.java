@@ -14,4 +14,12 @@ public interface WmUserService extends IService<WmUser> {
      */
     public ResponseResult login(WmLoginDto dto);
 
+
+    /**
+     * 创建自媒体用户
+     * @param wmUser
+     * @return
+     */
+    ResponseResult createWmUser(WmUser wmUser);
+
 }
