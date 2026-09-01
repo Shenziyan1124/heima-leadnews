@@ -1,6 +1,7 @@
 package com.heima.article.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.heima.model.article.dtos.ArticleBehaviorDto;
 import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
 import com.heima.model.article.pojos.ApArticle;
@@ -31,4 +32,11 @@ public interface ApArticleService extends IService<ApArticle> {
      * @return
      */
     ResponseResult getArticleCountByChannelId(Integer id);
+
+    /**
+     * 加载文章行为,判断当前用户是否已经关注该文章的作者、是否收藏了此文章、是否点赞了文章、是否不喜欢该文章等
+     * @param dto
+     * @return
+     */
+    ResponseResult loadArticleBehavior(ArticleBehaviorDto dto);
 }

@@ -1,5 +1,6 @@
 package com.heima.article.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heima.article.mapper.ApArticleConfigMapper;
@@ -8,13 +9,17 @@ import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.service.ApArticleService;
 import com.heima.article.service.ArticleFreemarkerService;
 import com.heima.common.constants.ArticleConstants;
+import com.heima.model.article.dtos.ArticleBehaviorDto;
 import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
 import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApArticleConfig;
 import com.heima.model.article.pojos.ApArticleContent;
+import com.heima.model.article.vos.ArticleBehaviorVo;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.user.pojos.ApUser;
+import com.heima.utils.thread.AppThreadLocalUtil;
 import io.micrometer.core.instrument.AbstractTimer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -154,5 +159,41 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
     public ResponseResult getArticleCountByChannelId(Integer id) {
         int count = lambdaQuery().eq(ApArticle::getChannelId, id).count();
         return ResponseResult.okResult(count);
+    }
+
+    /**
+     * 加载文章行为,判断当前用户是否已经关注该文章的作者、是否收藏了此文章、是否点赞了文章、是否不喜欢该文章等
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult loadArticleBehavior(ArticleBehaviorDto dto) {
+
+        // 1.参数校验
+        if (dto == null || dto.getArticleId() == null || dto.getAuthorId() == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        // 2.判断用户是否登录
+        ApUser user = AppThreadLocalUtil.getUser();
+        if (user == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+        LambdaQueryWrapper<ApArticle> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ApArticle::getAuthorId, dto.getAuthorId());
+        wrapper.eq(ApArticle::getId, dto.getArticleId());
+        ApArticle apArticle = getOne(wrapper);
+
+        // TODO 获取文章行为
+        ArticleBehaviorVo vo = new ArticleBehaviorVo();
+        vo.setIslike(apArticle.getLikes() != null && apArticle.getLikes() > 0);
+        vo.setIsunlike(false);
+        vo.setIscollection(apArticle.getCollection() != null && apArticle.getCollection() > 0);
+        vo.setIsfollow(false);
+
+
+        return null;
     }
 }
