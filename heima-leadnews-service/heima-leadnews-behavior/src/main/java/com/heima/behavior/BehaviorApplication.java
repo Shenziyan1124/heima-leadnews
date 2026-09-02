@@ -1,4 +1,4 @@
-package com.heima.article;
+package com.heima.behavior;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -8,19 +8,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication(scanBasePackages = "com.heima")
 @EnableDiscoveryClient
-@MapperScan("com.heima.article.mapper")
-@EnableAsync
-@EnableScheduling
-public class ArticleApplication {
+@MapperScan("com.heima.behavior.mapper")
+public class BehaviorApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ArticleApplication.class,args);
+        SpringApplication.run(BehaviorApplication.class,args);
     }
 
     @Bean
