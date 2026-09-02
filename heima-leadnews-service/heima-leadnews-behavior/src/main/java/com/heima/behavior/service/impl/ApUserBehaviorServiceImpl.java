@@ -5,6 +5,7 @@ import com.heima.behavior.service.ApUserBehaviorService;
 import com.heima.common.constants.ApUserBehaviorConstants;
 import com.heima.common.redis.CacheService;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
+import com.heima.model.behavior.dtos.ReadBehaviorDto;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.user.pojos.ApUser;
@@ -90,5 +91,27 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         //Boolean isLike = cacheService.sIsMember(
         //        ApUserBehaviorConstants.LIKES_ARTICLE_KEY + articleId, userId.toString(
         //        ));
+    }
+
+    /**
+     * 用户阅读行为
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult saveReadBehavior(ReadBehaviorDto dto) {
+        log.info("用户阅读行为: {}", dto);
+        if (dto == null || dto.getArticleId() == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        //Integer userId = AppThreadLocalUtil.getUser().getId();
+        String key = ApUserBehaviorConstants.READ_COUNT_KEY + dto.getArticleId();
+        cacheService.incrBy(key, 1);
+
+        kafkaTemplate.send(ApUserBehaviorConstants.READ_KAFKA_TOPIC, String.valueOf(dto.getArticleId()));
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }

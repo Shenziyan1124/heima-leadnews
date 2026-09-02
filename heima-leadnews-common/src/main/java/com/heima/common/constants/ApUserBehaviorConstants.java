@@ -18,9 +18,12 @@ public class ApUserBehaviorConstants {
     public final static Short LIKES_DYNAMIC_TYPE = 1; // 动态
     public final static Short LIKES_COMMENT_TYPE = 2; // 评论
 
-
     public final static String LIKES_KAFKA_TOPIC = "likes_topic";
 
+    // --------------------------------
+    // 阅读key
+    public final static String READ_COUNT_KEY = "read_count:article:";
+    public final static String READ_KAFKA_TOPIC = "read_topic";
 
 
 }

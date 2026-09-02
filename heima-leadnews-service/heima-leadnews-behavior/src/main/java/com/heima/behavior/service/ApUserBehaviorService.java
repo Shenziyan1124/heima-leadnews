@@ -1,6 +1,7 @@
 package com.heima.behavior.service;
 
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
+import com.heima.model.behavior.dtos.ReadBehaviorDto;
 import com.heima.model.common.dtos.ResponseResult;
 
 public interface ApUserBehaviorService {
@@ -11,4 +12,11 @@ public interface ApUserBehaviorService {
      * @return
      */
     ResponseResult saveLikesBehavior(LikesBehaviorDto dto);
+
+    /**
+     * 用户阅读行为
+     * @param dto
+     * @return
+     */
+    ResponseResult saveReadBehavior(ReadBehaviorDto dto);
 }

@@ -4,8 +4,10 @@ package com.heima.article.listener;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.mapper.ApLikesBehaviorMapper;
 import com.heima.common.constants.ApUserBehaviorConstants;
+import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApLikesBehavior;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +25,8 @@ public class BehaviorListener {
 
     @Autowired
     private ApLikesBehaviorMapper apLikesBehaviorMapper;
+    @Autowired
+    private ApArticleMapper apArticleMapper;
 
     @KafkaListener(topics = ApUserBehaviorConstants.LIKES_KAFKA_TOPIC)
     public void likesBehaviorListener(String message) {
@@ -62,6 +66,32 @@ public class BehaviorListener {
             }
         } catch (Exception e) {
             log.error("Kafka消费点赞消息失败，等待重试: {}", e.getMessage());
+            throw e; // 抛出异常，Kafka会自动重试
+        }
+    }
+
+
+
+    @KafkaListener(topics = ApUserBehaviorConstants.READ_KAFKA_TOPIC)
+    public void readBehaviorListener(String message) {
+        log.info("article端收到read Kafka的消息: {}", message);
+
+        try {
+            if (StringUtils.isNotBlank(message)) {
+                Long articleId = Long.valueOf(message);
+                LambdaUpdateWrapper<ApArticle> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(ApArticle::getId, articleId);
+                updateWrapper.setSql("views = views + 1");
+                apArticleMapper.update(null, updateWrapper);
+
+                log.info("article端更新文章阅读数成功: {}", message);
+            } else {
+                log.info("article端收到空消息");
+                log.info("article端更新文章阅读数成功: {}", message);
+            }
+
+        } catch (Exception e) {
+            log.error("Kafka消费阅读消息失败，等待重试: {}", e.getMessage());
             throw e; // 抛出异常，Kafka会自动重试
         }
     }
