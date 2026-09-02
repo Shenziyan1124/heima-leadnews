@@ -106,11 +106,22 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
 
+        // 1.获取用户ID
         //Integer userId = AppThreadLocalUtil.getUser().getId();
+        Integer userId = 4;
+
+        // 2.更新Redis阅读次数
         String key = ApUserBehaviorConstants.READ_COUNT_KEY + dto.getArticleId();
         cacheService.incrBy(key, 1);
 
-        kafkaTemplate.send(ApUserBehaviorConstants.READ_KAFKA_TOPIC, String.valueOf(dto.getArticleId()));
+        // 3.发送Kafka，article服务更新MySQL
+        Map<String, Object> map = new HashMap<>();
+        map.put("articleId", dto.getArticleId());
+        map.put("userId", userId);
+        map.put("equipmentId", dto.getEquipmentId() == null ? null : dto.getEquipmentId());
+        map.put("readDuration", dto.getReadDuration() == null ? null : dto.getReadDuration());
+        map.put("percentage", dto.getPercentage() == null ? null : dto.getPercentage());
+        kafkaTemplate.send(ApUserBehaviorConstants.READ_KAFKA_TOPIC, JSON.toJSONString(map));
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
