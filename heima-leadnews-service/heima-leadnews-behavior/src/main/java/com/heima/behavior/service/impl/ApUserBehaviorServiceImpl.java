@@ -50,11 +50,12 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         }
 
         // 2.校验用户是否登录
-        //ApUser user = AppThreadLocalUtil.getUser();
-        //if (user == null) {
-        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        //}
-        Integer userId = 4;
+        ApUser user = AppThreadLocalUtil.getUser();
+        if (user == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+        Integer userId = user.getId();
+        //Integer userId = 4;
 
         // 3.判断是点赞还是取消点赞
         if (Objects.equals(dto.getOperation(), ApUserBehaviorConstants.LIKE)){
@@ -107,8 +108,8 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         }
 
         // 1.获取用户ID
-        //Integer userId = AppThreadLocalUtil.getUser().getId();
-        Integer userId = 4;
+        Integer userId = AppThreadLocalUtil.getUser().getId();
+        //Integer userId = 4;
 
         // 2.更新Redis阅读次数
         String key = ApUserBehaviorConstants.READ_COUNT_KEY + dto.getArticleId();

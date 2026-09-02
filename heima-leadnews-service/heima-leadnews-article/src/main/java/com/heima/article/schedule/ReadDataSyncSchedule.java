@@ -1,9 +1,11 @@
 package com.heima.article.schedule;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.heima.article.mapper.ApArticleMapper;
 import com.heima.common.constants.ApUserBehaviorConstants;
 import com.heima.common.redis.CacheService;
+import com.heima.model.article.pojos.ApArticle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -66,15 +68,32 @@ public class ReadDataSyncSchedule {
                 continue;
             }
 
-            // 3. 更新MySQL的views字段
-            LambdaUpdateWrapper<com.heima.model.article.pojos.ApArticle> updateWrapper =
-                    new LambdaUpdateWrapper<>();
-            updateWrapper.eq(com.heima.model.article.pojos.ApArticle::getId, articleId);
-            updateWrapper.set(com.heima.model.article.pojos.ApArticle::getViews, redisCount);
+            // 3. 查询MySQL当前views值
+            LambdaQueryWrapper<ApArticle> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ApArticle::getId, articleId);
+            queryWrapper.select(ApArticle::getId, ApArticle::getViews);
+            ApArticle article = apArticleMapper.selectOne(queryWrapper);
+
+            if (article == null) {
+                log.warn("文章不存在: articleId={}", articleId);
+                continue;
+            }
+
+            // 4. 比较Redis和MySQL的值，不同才更新
+            Integer mysqlViews = article.getViews();
+            if (mysqlViews != null && mysqlViews == redisCount) {
+                log.debug("阅读数据已一致，跳过: articleId={}, views={}", articleId, redisCount);
+                continue;
+            }
+
+            // 5. 更新MySQL的views字段
+            LambdaUpdateWrapper<ApArticle> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(ApArticle::getId, articleId);
+            updateWrapper.set(ApArticle::getViews, redisCount);
             apArticleMapper.update(null, updateWrapper);
 
             syncCount++;
-            log.info("同步阅读数据成功: articleId={}, views={}", articleId, redisCount);
+            log.info("同步阅读数据成功: articleId={}, redis={}, mysql={}", articleId, redisCount, mysqlViews);
         }
 
         log.info("Redis阅读数据同步完成，共同步{}条记录", syncCount);

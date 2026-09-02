@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
@@ -89,6 +90,7 @@ public class BehaviorListener {
                 Integer equipmentId = map.get("equipmentId") != null ? ((Number) map.get("equipmentId")).intValue() : null;
                 Integer readDuration = map.get("readDuration") != null ? ((Number) map.get("readDuration")).intValue() : null;
                 Integer percentage = map.get("percentage") != null ? ((Number) map.get("percentage")).intValue() : null;
+
 
                 // 1. 更新文章总阅读量
                 LambdaUpdateWrapper<ApArticle> updateWrapper = new LambdaUpdateWrapper<>();
