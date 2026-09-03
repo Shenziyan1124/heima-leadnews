@@ -3,6 +3,7 @@ package com.heima.behavior.controller.v1;
 import com.heima.behavior.service.ApUserBehaviorService;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
 import com.heima.model.behavior.dtos.ReadBehaviorDto;
+import com.heima.model.behavior.dtos.UnLikesBehaviorDto;
 import com.heima.model.common.dtos.ResponseResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,6 +32,12 @@ public class ApUserBehavior {
     @ApiOperation("用户阅读行为")
     public ResponseResult saveReadBehavior(@RequestBody ReadBehaviorDto dto) {
         return apUserBehaviorService.saveReadBehavior(dto);
+    }
+
+    @PostMapping("un_likes_behavior")
+    @ApiOperation("用户不喜欢行为")
+    public ResponseResult saveUnLikeBehavior(@RequestBody UnLikesBehaviorDto dto) {
+        return apUserBehaviorService.saveUnLikeBehavior(dto);
     }
 
 }

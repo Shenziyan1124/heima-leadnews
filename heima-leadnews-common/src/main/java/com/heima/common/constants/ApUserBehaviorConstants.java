@@ -36,6 +36,8 @@ public class ApUserBehaviorConstants {
     // 不喜欢 redis key
     public final static String UN_LIKE_ARTICLE_KEY = "un_like:article:"; // 文章不喜欢key
     public final static String UN_LIKE_USER_KEY = "un_like:user:"; // 用户不喜欢key
+    // 不喜欢kafka topic
+    public final static String UN_LIKE_KAFKA_TOPIC = "un_like_topic";
 
 
 }

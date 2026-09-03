@@ -6,6 +6,7 @@ import com.heima.common.constants.ApUserBehaviorConstants;
 import com.heima.common.redis.CacheService;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
 import com.heima.model.behavior.dtos.ReadBehaviorDto;
+import com.heima.model.behavior.dtos.UnLikesBehaviorDto;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.user.pojos.ApUser;
@@ -125,5 +126,57 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         kafkaTemplate.send(ApUserBehaviorConstants.READ_KAFKA_TOPIC, JSON.toJSONString(map));
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    /**
+     * 用户不喜欢行为
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult saveUnLikeBehavior(UnLikesBehaviorDto dto) {
+        // 1.校验参数
+        if (dto == null ||
+                dto.getArticleId() == null ||
+                dto.getType() == null || dto.getType() < 0 || dto.getType() > 2
+        ) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        // 2.校验用户是否登录
+        Integer userId = AppThreadLocalUtil.getUser().getId();
+        if (userId == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 3.写入Redis
+        // 映射type值：前端0→数据库2，前端1→数据库3
+        Short dbType = (short) (dto.getType() + 2);
+        if (dbType == ApUserBehaviorConstants.UN_LIKE){
+            // 不喜欢
+            cacheService.sAdd(ApUserBehaviorConstants.UN_LIKE_ARTICLE_KEY + dto.getArticleId(), userId.toString());
+            cacheService.sAdd(ApUserBehaviorConstants.UN_LIKE_USER_KEY + userId, dto.getArticleId().toString());
+
+            // 发送Kafka，article服务更新MySQL
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", userId);
+            map.put("articleId", dto.getArticleId());
+            map.put("type", dbType);
+            kafkaTemplate.send(ApUserBehaviorConstants.UN_LIKE_KAFKA_TOPIC, JSON.toJSONString(map));
+        }else {
+            // 取消不喜欢
+            cacheService.sRemove(ApUserBehaviorConstants.UN_LIKE_ARTICLE_KEY + dto.getArticleId(), userId.toString());
+            cacheService.sRemove(ApUserBehaviorConstants.UN_LIKE_USER_KEY + userId, dto.getArticleId().toString());
+
+            // 发送Kafka，article服务更新MySQL
+            Map<String, Object> map2 = new HashMap<>();
+            map2.put("userId", userId);
+            map2.put("articleId", dto.getArticleId());
+            map2.put("type", dbType);
+            kafkaTemplate.send(ApUserBehaviorConstants.UN_LIKE_KAFKA_TOPIC, JSON.toJSONString(map2));
+        }
+
+        return null;
     }
 }

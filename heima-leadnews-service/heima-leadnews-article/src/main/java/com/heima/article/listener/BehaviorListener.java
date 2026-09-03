@@ -191,4 +191,63 @@ public class BehaviorListener {
             throw e; // 抛出异常，Kafka会自动重试
         }
     }
+
+
+
+    @KafkaListener(topics = ApUserBehaviorConstants.UN_LIKE_KAFKA_TOPIC)
+    public void unLikeBehaviorListener(String message) {
+        log.info("article端收到unLike Kafka的消息: {}", message);
+        try {
+            if (StringUtils.isNotBlank(message)) {
+                Map map = JSON.parseObject(message, Map.class);
+                Integer userId = ((Number) map.get("userId")).intValue();
+                Long articleId = ((Number) map.get("articleId")).longValue();
+                Short type = ((Number) map.get("type")).shortValue();
+
+                if (Objects.equals(type, ApUserBehaviorConstants.UN_LIKE)) {
+                    // 不喜欢(type=2) - 插入记录
+                    LambdaQueryWrapper<ApLikesBehavior> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(ApLikesBehavior::getArticleId, articleId);
+                    queryWrapper.eq(ApLikesBehavior::getUserId, userId);
+                    queryWrapper.eq(ApLikesBehavior::getType, type);
+                    ApLikesBehavior existRecord = apLikesBehaviorMapper.selectOne(queryWrapper);
+
+                    if (existRecord == null) {
+                        ApLikesBehavior record = new ApLikesBehavior();
+                        record.setArticleId(articleId);
+                        record.setUserId(userId);
+                        record.setType(type);
+                        record.setCreatedTime(new Date());
+                        record.setUpdateTime(new Date());
+                        record.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);
+                        apLikesBehaviorMapper.insert(record);
+                        log.info("article端插入不喜欢记录成功: articleId={}, userId={}", articleId, userId);
+                    } else if (existRecord.getIsDelete() == ApUserBehaviorConstants.DELETE) {
+                        LambdaUpdateWrapper<ApLikesBehavior> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.eq(ApLikesBehavior::getId, existRecord.getId());
+                        updateWrapper.set(ApLikesBehavior::getIsDelete, ApUserBehaviorConstants.CANCEL_DELETE);
+                        updateWrapper.set(ApLikesBehavior::getUpdateTime, new Date());
+                        apLikesBehaviorMapper.update(null, updateWrapper);
+                        log.info("article端恢复不喜欢记录成功: articleId={}, userId={}", articleId, userId);
+                    } else {
+                        log.info("article端不喜欢记录已存在，跳过: articleId={}, userId={}", articleId, userId);
+                    }
+
+                } else {
+                    // 取消不喜欢(type=3) - 软删除type=2的记录
+                    LambdaUpdateWrapper<ApLikesBehavior> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(ApLikesBehavior::getArticleId, articleId);
+                    updateWrapper.eq(ApLikesBehavior::getUserId, userId);
+                    updateWrapper.eq(ApLikesBehavior::getType, ApUserBehaviorConstants.UN_LIKE);
+                    updateWrapper.set(ApLikesBehavior::getIsDelete, ApUserBehaviorConstants.DELETE);
+                    updateWrapper.set(ApLikesBehavior::getUpdateTime, new Date());
+                    apLikesBehaviorMapper.update(null, updateWrapper);
+                    log.info("article端软删除不喜欢记录成功: articleId={}, userId={}", articleId, userId);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Kafka消费不喜欢消息失败，等待重试: {}", e.getMessage());
+            throw e;
+        }
+    }
 }
