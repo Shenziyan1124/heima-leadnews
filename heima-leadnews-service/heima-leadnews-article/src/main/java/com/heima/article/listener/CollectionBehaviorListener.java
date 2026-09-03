@@ -2,8 +2,10 @@ package com.heima.article.listener;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.mapper.ApCollectionMapper;
 import com.heima.common.constants.ApUserBehaviorConstants;
+import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApCollection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +24,9 @@ public class CollectionBehaviorListener {
 
     @Autowired
     private ApCollectionMapper apCollectionMapper;
+    @Autowired
+    private ApArticleMapper apArticleMapper;
+
 
     @KafkaListener(topics = ApUserBehaviorConstants.COLLECT_KAFKA_TOPIC)
     public void onMessage(String message) {
@@ -66,6 +71,9 @@ public class CollectionBehaviorListener {
                 record.setCollectionTime(new Date());
                 record.setPublishedTime(new Date());
                 apCollectionMapper.insert(record);
+
+
+
                 log.info("article端插入收藏记录成功: articleId={}, userId={}", articleId, userId);
             } catch (DuplicateKeyException e) {
                 log.warn("article端收藏记录已存在(并发插入), 跳过: articleId={}, userId={}", articleId, userId);
@@ -73,6 +81,11 @@ public class CollectionBehaviorListener {
         } else {
             log.info("article端收藏记录已存在，跳过: articleId={}, userId={}", articleId, userId);
         }
+
+        LambdaUpdateWrapper<ApArticle> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(ApArticle::getId, articleId);
+        updateWrapper.setSql("collection = collection + 1");
+        apArticleMapper.update(null, updateWrapper);
     }
 
     private void handleCancelCollect(Integer userId, Long articleId, Short type) {
@@ -93,6 +106,13 @@ public class CollectionBehaviorListener {
         updateWrapper.set(ApCollection::getIsDelete, (short) 1);
         updateWrapper.set(ApCollection::getPublishedTime, new Date());
         apCollectionMapper.update(null, updateWrapper);
+
+
+        LambdaUpdateWrapper<ApArticle> updateWrapper2 = new LambdaUpdateWrapper<>();
+        updateWrapper2.eq(ApArticle::getId, articleId);
+        updateWrapper2.setSql("collection = GREATEST(IFNULL(collection, 0) - 1, 0)");
+        apArticleMapper.update(null, updateWrapper2);
+
         log.info("article端取消收藏成功: articleId={}, userId={}", articleId, userId);
     }
 }
