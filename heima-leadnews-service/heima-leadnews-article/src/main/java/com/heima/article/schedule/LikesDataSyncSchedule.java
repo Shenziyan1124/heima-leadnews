@@ -70,7 +70,7 @@ public class LikesDataSyncSchedule {
             // 3. 查询MySQL中该文章已有的点赞记录（未删除的）
             LambdaQueryWrapper<ApLikesBehavior> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(ApLikesBehavior::getArticleId, articleId);
-            wrapper.eq(ApLikesBehavior::getType, ApUserBehaviorConstants.LIKES_ARTICLE_TYPE);
+            wrapper.eq(ApLikesBehavior::getOperation, ApUserBehaviorConstants.LIKE); // operation=0点赞
             wrapper.eq(ApLikesBehavior::getIsDelete, (short) 0);
             List<ApLikesBehavior> existList = likesBehaviorMapper.selectList(wrapper);
 
@@ -88,7 +88,8 @@ public class LikesDataSyncSchedule {
                         ApLikesBehavior newRecord = new ApLikesBehavior();
                         newRecord.setArticleId(articleId);
                         newRecord.setUserId(userId);
-                        newRecord.setType(ApUserBehaviorConstants.LIKES_ARTICLE_TYPE);
+                        newRecord.setType((short) 0); // 默认文章
+                        newRecord.setOperation(ApUserBehaviorConstants.LIKE); // operation=0点赞
                         newRecord.setCreatedTime(new Date());
                         newRecord.setUpdateTime(new Date());
                         newRecord.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);

@@ -37,6 +37,11 @@ public class ApLikesBehavior implements Serializable {
     private Short type;
 
     /**
+     * 0点赞 1取消点赞 2 不喜欢 3 取消不喜欢
+     */
+    private Short operation;
+
+    /**
      * 创建时间
      */
     @TableField("created_time")

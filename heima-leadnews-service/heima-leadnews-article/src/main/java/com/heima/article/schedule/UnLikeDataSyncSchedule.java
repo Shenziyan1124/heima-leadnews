@@ -64,7 +64,7 @@ public class UnLikeDataSyncSchedule {
             // 3. 查询MySQL中该文章已有的不喜欢记录（未删除的）
             LambdaQueryWrapper<ApLikesBehavior> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(ApLikesBehavior::getArticleId, articleId);
-            wrapper.eq(ApLikesBehavior::getType, ApUserBehaviorConstants.UN_LIKE);
+            wrapper.eq(ApLikesBehavior::getOperation, ApUserBehaviorConstants.UN_LIKE); // operation=2不喜欢
             wrapper.eq(ApLikesBehavior::getIsDelete, (short) 0);
             List<ApLikesBehavior> existList = likesBehaviorMapper.selectList(wrapper);
 
@@ -82,10 +82,11 @@ public class UnLikeDataSyncSchedule {
                         ApLikesBehavior newRecord = new ApLikesBehavior();
                         newRecord.setArticleId(articleId);
                         newRecord.setUserId(userId);
-                        newRecord.setType(ApUserBehaviorConstants.UN_LIKE);
+                        newRecord.setType((short) 0); // 默认文章
+                        newRecord.setOperation(ApUserBehaviorConstants.UN_LIKE); // operation=2不喜欢
                         newRecord.setCreatedTime(new Date());
                         newRecord.setUpdateTime(new Date());
-                        newRecord.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);
+                        newRecord.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE); // 默认未删除
                         likesBehaviorMapper.insert(newRecord);
                         syncCount++;
                         log.info("补插入不喜欢记录: articleId={}, userId={}", articleId, userId);

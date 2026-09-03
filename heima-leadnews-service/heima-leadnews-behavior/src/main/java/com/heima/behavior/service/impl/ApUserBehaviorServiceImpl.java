@@ -51,12 +51,12 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         }
 
         // 2.校验用户是否登录
-        ApUser user = AppThreadLocalUtil.getUser();
-        if (user == null) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        }
-        Integer userId = user.getId();
-        //Integer userId = 4;
+        //ApUser user = AppThreadLocalUtil.getUser();
+        //if (user == null) {
+        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        //}
+        //Integer userId = user.getId();
+        Integer userId = 4;
 
         // 3.判断是点赞还是取消点赞
         if (Objects.equals(dto.getOperation(), ApUserBehaviorConstants.LIKE)){
@@ -145,15 +145,16 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         }
 
         // 2.校验用户是否登录
-        Integer userId = AppThreadLocalUtil.getUser().getId();
-        if (userId == null) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        }
+        //Integer userId = AppThreadLocalUtil.getUser().getId();
+        //if (userId == null) {
+        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        //}
+        Integer userId = 4;
 
         // 3.写入Redis
         // 映射type值：前端0→数据库2，前端1→数据库3
-        Short dbType = (short) (dto.getType() + 2);
-        if (dbType == ApUserBehaviorConstants.UN_LIKE){
+        Short dbOperation = (short) (dto.getType() + 2);
+        if (dbOperation == ApUserBehaviorConstants.UN_LIKE){
             // 不喜欢
             cacheService.sAdd(ApUserBehaviorConstants.UN_LIKE_ARTICLE_KEY + dto.getArticleId(), userId.toString());
             cacheService.sAdd(ApUserBehaviorConstants.UN_LIKE_USER_KEY + userId, dto.getArticleId().toString());
@@ -162,7 +163,8 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
             map.put("articleId", dto.getArticleId());
-            map.put("type", dbType);
+            map.put("type", ApUserBehaviorConstants.LIKES_ARTICLE_TYPE);
+            map.put("operation", dbOperation); // 0 只有文章才有不喜欢
             kafkaTemplate.send(ApUserBehaviorConstants.UN_LIKE_KAFKA_TOPIC, JSON.toJSONString(map));
         }else {
             // 取消不喜欢
@@ -173,10 +175,11 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             Map<String, Object> map2 = new HashMap<>();
             map2.put("userId", userId);
             map2.put("articleId", dto.getArticleId());
-            map2.put("type", dbType);
+            map2.put("type", ApUserBehaviorConstants.LIKES_ARTICLE_TYPE);
+            map2.put("operation", dbOperation); // 0 只有文章才有不喜欢
             kafkaTemplate.send(ApUserBehaviorConstants.UN_LIKE_KAFKA_TOPIC, JSON.toJSONString(map2));
         }
 
-        return null;
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }
