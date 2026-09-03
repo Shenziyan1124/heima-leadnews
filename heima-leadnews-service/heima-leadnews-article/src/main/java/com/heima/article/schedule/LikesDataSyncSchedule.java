@@ -1,9 +1,12 @@
 package com.heima.article.schedule;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.heima.article.mapper.ApArticleMapper;
 import com.heima.article.mapper.ApLikesBehaviorMapper;
 import com.heima.common.constants.ApUserBehaviorConstants;
 import com.heima.common.redis.CacheService;
+import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApLikesBehavior;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,9 @@ public class LikesDataSyncSchedule {
 
     @Autowired
     private ApLikesBehaviorMapper likesBehaviorMapper;
+
+    @Autowired
+    private ApArticleMapper apArticleMapper;
 
     /**
      * 每5分钟执行一次，同步Redis点赞数据到MySQL
@@ -92,6 +98,26 @@ public class LikesDataSyncSchedule {
                     }
                 } catch (NumberFormatException e) {
                     log.warn("解析userId失败: {}", userIdStr);
+                }
+            }
+
+            // 5. 同步ap_article.likes（Redis Set数量 = 点赞数）
+            LambdaQueryWrapper<ApArticle> articleWrapper = new LambdaQueryWrapper<>();
+            articleWrapper.eq(ApArticle::getId, articleId);
+            articleWrapper.select(ApArticle::getId, ApArticle::getLikes);
+            ApArticle article = apArticleMapper.selectOne(articleWrapper);
+
+            if (article != null) {
+                int redisLikes = userIds.size();
+                Integer mysqlLikes = article.getLikes();
+
+                // 只在值不同时更新
+                if (mysqlLikes == null || mysqlLikes != redisLikes) {
+                    LambdaUpdateWrapper<ApArticle> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(ApArticle::getId, articleId);
+                    updateWrapper.set(ApArticle::getLikes, redisLikes);
+                    apArticleMapper.update(null, updateWrapper);
+                    log.info("同步文章点赞数成功: articleId={}, redis={}, mysql={}", articleId, redisLikes, mysqlLikes);
                 }
             }
         }
