@@ -29,7 +29,7 @@ public class ReadDataSyncSchedule {
     /**
      * 每5分钟执行一次，同步Redis阅读数据到MySQL
      */
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 300000, initialDelay = 20000)
     public void syncReadData() {
         log.info("开始同步Redis阅读数据到MySQL...");
 

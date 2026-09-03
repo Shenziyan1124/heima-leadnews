@@ -40,4 +40,16 @@ public class ApUserBehaviorConstants {
     public final static String UN_LIKE_KAFKA_TOPIC = "un_like_topic";
 
 
+    // -------------------------------
+    // 收藏
+    public final static short COLLECT = 0;      // 收藏
+    public final static short CANCEL_COLLECT = 1; // 取消收藏
+
+    // 收藏 redis key
+    public final static String COLLECT_ARTICLE_KEY = "collect:article:"; // 文章收藏key
+    public final static String COLLECT_USER_KEY = "collect:user:"; // 用户收藏key
+    // 收藏kafka topic
+    public final static String COLLECT_KAFKA_TOPIC = "collect_topic";
+
+
 }

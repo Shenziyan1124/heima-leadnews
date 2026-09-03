@@ -1,5 +1,6 @@
 package com.heima.behavior.service;
 
+import com.heima.model.behavior.dtos.CollectionBehaviorDto;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
 import com.heima.model.behavior.dtos.ReadBehaviorDto;
 import com.heima.model.behavior.dtos.UnLikesBehaviorDto;
@@ -27,4 +28,11 @@ public interface ApUserBehaviorService {
      * @return
      */
     ResponseResult saveUnLikeBehavior(UnLikesBehaviorDto dto);
+
+    /**
+     * 用户收藏行为
+     * @param dto
+     * @return
+     */
+    ResponseResult saveCollectionBehavior(CollectionBehaviorDto dto);
 }

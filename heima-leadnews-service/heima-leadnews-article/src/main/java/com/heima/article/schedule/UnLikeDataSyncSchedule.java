@@ -30,7 +30,7 @@ public class UnLikeDataSyncSchedule {
     /**
      * 每5分钟执行一次，同步Redis不喜欢数据到MySQL
      */
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 300000, initialDelay = 10000)
     public void syncUnLikeData() {
         log.info("开始同步Redis不喜欢数据到MySQL...");
 

@@ -1,6 +1,7 @@
 package com.heima.behavior.controller.v1;
 
 import com.heima.behavior.service.ApUserBehaviorService;
+import com.heima.model.behavior.dtos.CollectionBehaviorDto;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
 import com.heima.model.behavior.dtos.ReadBehaviorDto;
 import com.heima.model.behavior.dtos.UnLikesBehaviorDto;
@@ -34,10 +35,16 @@ public class ApUserBehavior {
         return apUserBehaviorService.saveReadBehavior(dto);
     }
 
-    @PostMapping("un_likes_behavior")
+    @PostMapping("/un_likes_behavior")
     @ApiOperation("用户不喜欢行为")
     public ResponseResult saveUnLikeBehavior(@RequestBody UnLikesBehaviorDto dto) {
         return apUserBehaviorService.saveUnLikeBehavior(dto);
+    }
+
+    @PostMapping("/collection_behavior")
+    @ApiOperation("用户收藏行为")
+    public ResponseResult saveCollectionBehavior(@RequestBody CollectionBehaviorDto dto) {
+        return apUserBehaviorService.saveCollectionBehavior(dto);
     }
 
 }
