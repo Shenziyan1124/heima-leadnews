@@ -91,7 +91,7 @@ public class LikesDataSyncSchedule {
                         newRecord.setType(ApUserBehaviorConstants.LIKES_ARTICLE_TYPE);
                         newRecord.setCreatedTime(new Date());
                         newRecord.setUpdateTime(new Date());
-                        newRecord.setIsDelete(ApUserBehaviorConstants.UN_DELETE);
+                        newRecord.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);
                         likesBehaviorMapper.insert(newRecord);
                         syncCount++;
                         log.info("补插入点赞记录: articleId={}, userId={}", articleId, userId);

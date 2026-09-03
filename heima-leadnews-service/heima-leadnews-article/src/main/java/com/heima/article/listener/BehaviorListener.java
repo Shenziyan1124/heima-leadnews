@@ -63,7 +63,7 @@ public class BehaviorListener {
                             apLikesBehavior.setType(type);
                             apLikesBehavior.setCreatedTime(new Date());
                             apLikesBehavior.setUpdateTime(new Date());
-                            apLikesBehavior.setIsDelete(ApUserBehaviorConstants.UN_DELETE);
+                            apLikesBehavior.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);
                             apLikesBehaviorMapper.insert(apLikesBehavior);
                             log.info("article端插入点赞记录成功: {}", apLikesBehavior);
                         } catch (DuplicateKeyException e) {
@@ -73,7 +73,7 @@ public class BehaviorListener {
                         // 已存在但被删除过，恢复点赞
                         LambdaUpdateWrapper<ApLikesBehavior> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(ApLikesBehavior::getId, existRecord.getId());
-                        updateWrapper.set(ApLikesBehavior::getIsDelete, ApUserBehaviorConstants.UN_DELETE);
+                        updateWrapper.set(ApLikesBehavior::getIsDelete, ApUserBehaviorConstants.CANCEL_DELETE);
                         updateWrapper.set(ApLikesBehavior::getUpdateTime, new Date());
                         apLikesBehaviorMapper.update(null, updateWrapper);
                         log.info("article端恢复点赞记录成功: articleId={}, userId={}", articleId, userId);
@@ -87,6 +87,24 @@ public class BehaviorListener {
                     updateWrapper.setSql("likes = likes + 1");
                     apArticleMapper.update(null, updateWrapper);
                 } else {
+
+                    // 点赞 - 先检查是否已存在
+                    LambdaQueryWrapper<ApLikesBehavior> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(ApLikesBehavior::getArticleId, articleId);
+                    queryWrapper.eq(ApLikesBehavior::getUserId, userId);
+                    queryWrapper.eq(ApLikesBehavior::getType, type);
+                    ApLikesBehavior existRecord = apLikesBehaviorMapper.selectOne(queryWrapper);
+
+                    if (existRecord == null) {
+                        log.info("article端取消点赞记录不存在, 跳过: articleId={}, userId={}", articleId, userId);
+                        return;
+                    }
+
+                    if (existRecord.getIsDelete() == ApUserBehaviorConstants.DELETE){
+                        log.info("article端取消点赞记录已删除, 跳过: articleId={}, userId={}", articleId, userId);
+                        return;
+                    }
+
                     // 取消点赞 - 软删除（更新is_delete=1）
                     LambdaUpdateWrapper<ApLikesBehavior> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(ApLikesBehavior::getArticleId, articleId);
