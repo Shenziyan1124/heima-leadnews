@@ -10,10 +10,14 @@ import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApLikesBehavior;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -61,9 +65,16 @@ public class LikesDataSyncSchedule {
                 continue;
             }
 
-            // 2. 获取该文章在Redis中的所有点赞用户
-            Set<String> userIds = cacheService.setMembers(key);
-            if (userIds == null || userIds.isEmpty()) {
+            // 2. 获取该文章在Redis中的所有点赞用户（使用sScan）
+            Set<String> userIds = new HashSet<>();
+            ScanOptions options = ScanOptions.scanOptions().match("*").count(100).build();
+            try (Cursor<String> cursor = cacheService.sScan(key, options)) {
+                while (cursor.hasNext()) {
+                    userIds.add(cursor.next());
+                }
+            }
+
+            if (userIds.isEmpty()) {
                 continue;
             }
 
@@ -75,7 +86,7 @@ public class LikesDataSyncSchedule {
             List<ApLikesBehavior> existList = likesBehaviorMapper.selectList(wrapper);
 
             // 已存在的userId集合
-            Set<Integer> existUserIds = new java.util.HashSet<>();
+            Set<Integer> existUserIds = new HashSet<>();
             for (ApLikesBehavior behavior : existList) {
                 existUserIds.add(behavior.getUserId());
             }
@@ -93,9 +104,13 @@ public class LikesDataSyncSchedule {
                         newRecord.setCreatedTime(new Date());
                         newRecord.setUpdateTime(new Date());
                         newRecord.setIsDelete(ApUserBehaviorConstants.CANCEL_DELETE);
-                        likesBehaviorMapper.insert(newRecord);
-                        syncCount++;
-                        log.info("补插入点赞记录: articleId={}, userId={}", articleId, userId);
+                        try {
+                            likesBehaviorMapper.insert(newRecord);
+                            syncCount++;
+                            log.info("补插入点赞记录: articleId={}, userId={}", articleId, userId);
+                        } catch (DuplicateKeyException e) {
+                            log.warn("点赞记录已存在(并发插入), 跳过: articleId={}, userId={}", articleId, userId);
+                        }
                     }
                 } catch (NumberFormatException e) {
                     log.warn("解析userId失败: {}", userIdStr);

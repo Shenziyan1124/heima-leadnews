@@ -10,10 +10,14 @@ import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApCollection;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -61,10 +65,13 @@ public class CollectionDataSyncSchedule {
                 continue;
             }
 
-            // 2. 获取该文章在Redis中的所有收藏用户
-            Set<String> userIds = cacheService.setMembers(key);
-            if (userIds == null || userIds.isEmpty()) {
-                continue;
+            // 2. 获取该文章在Redis中的所有收藏用户（使用sScan）
+            Set<String> userIds = new HashSet<>();
+            ScanOptions options = ScanOptions.scanOptions().match("*").count(100).build();
+            try (Cursor<String> cursor = cacheService.sScan(key, options)) {
+                while (cursor.hasNext()) {
+                    userIds.add(cursor.next());
+                }
             }
 
             // 3. 查询MySQL中该文章已有的收藏记录（未删除的）
@@ -74,7 +81,7 @@ public class CollectionDataSyncSchedule {
             List<ApCollection> existList = apCollectionMapper.selectList(wrapper);
 
             // 已存在的userId集合
-            Set<Integer> existUserIds = new java.util.HashSet<>();
+            Set<Integer> existUserIds = new HashSet<>();
             for (ApCollection collection : existList) {
                 existUserIds.add(collection.getUserId());
             }
@@ -91,9 +98,13 @@ public class CollectionDataSyncSchedule {
                         newRecord.setIsDelete((short) 0);
                         newRecord.setCollectionTime(new Date());
                         newRecord.setPublishedTime(new Date());
-                        apCollectionMapper.insert(newRecord);
-                        syncCount++;
-                        log.info("补插入收藏记录: articleId={}, userId={}", articleId, userId);
+                        try {
+                            apCollectionMapper.insert(newRecord);
+                            syncCount++;
+                            log.info("补插入收藏记录: articleId={}, userId={}", articleId, userId);
+                        } catch (DuplicateKeyException e) {
+                            log.warn("收藏记录已存在(并发插入), 跳过: articleId={}, userId={}", articleId, userId);
+                        }
                     }
                 } catch (NumberFormatException e) {
                     log.warn("解析userId失败: {}", userIdStr);
