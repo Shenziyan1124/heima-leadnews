@@ -25,7 +25,18 @@ public class IWemediaClientFallback implements FallbackFactory<IWemediaClient> {
             @Override
             public ResponseResult createWmUser(WmUser wmUser) {
                 log.error("调用 wemedia 服务创建用户失败: wmUser={}, cause={}", wmUser, throwable.getMessage(), throwable);
-                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "调用 wemedia 服务失败");
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "调用 wemedia 服务 - createWmUser失败");
+            }
+
+            /**
+             * 根据用户ID查询自媒体用户
+             *
+             * @param userId
+             */
+            @Override
+            public ResponseResult getWmUserByUserId(Integer userId) {
+                log.error("调用 wemedia 服务根据用户ID查询自媒体用户失败: userId={}, cause={}", userId, throwable.getMessage(), throwable);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "调用 wemedia 服务 - getWmUserByUserId失败");
             }
         };
     }

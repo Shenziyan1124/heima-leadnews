@@ -18,4 +18,11 @@ public interface IWemediaClient {
      */
     @PostMapping("/api/v1/user/create")
     ResponseResult createWmUser(@RequestBody WmUser wmUser);
+
+    /**
+     * 根据用户ID查询自媒体用户
+     */
+    @PostMapping("/api/v1/user/getByUserId")
+    ResponseResult getWmUserByUserId(@RequestBody Integer userId);
+
 }

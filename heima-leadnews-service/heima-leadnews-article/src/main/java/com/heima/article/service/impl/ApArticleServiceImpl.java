@@ -176,8 +176,8 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
         }
 
         // 2.判断用户是否登录
-        ApUser user = AppThreadLocalUtil.getUser();
-        if (user == null){
+        Integer userId = AppThreadLocalUtil.getUser().getId();
+        if (userId == null){
             return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
         }
 

@@ -52,4 +52,15 @@ public class ApUserBehaviorConstants {
     public final static String COLLECT_KAFKA_TOPIC = "collect_topic";
 
 
+    // -------------------------------
+    // 关注
+    public final static short FOLLOW = 0;      // 关注
+    public final static short CANCEL_FOLLOW = 1; // 取消关注
+
+    // 关注 redis key
+    public final static String FOLLOW_USER_KEY = "follow:user:"; // 用户关注key
+    public final static String FOLLOW_FANS_KEY = "follow:fans:"; // 用户粉丝key
+    // 关注kafka topic
+    public final static String FOLLOW_KAFKA_TOPIC = "follow_topic";
+
 }
