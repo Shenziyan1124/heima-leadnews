@@ -26,11 +26,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -51,6 +53,8 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
     private IWemediaClient wemediaClient;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     /**
      * 登录
@@ -113,30 +117,27 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
         //Integer userId = AppThreadLocalUtil.getUser().getId();
         Integer userId = 4;
 
-
-        //if (dto.getOperation() == ApUserBehaviorConstants.FOLLOW){
-        //    // 关注
-        //    cacheService.sAdd(ApUserBehaviorConstants.FOLLOW_USER_KEY + userId, String.valueOf(dto.getAuthorId()));
-        //    cacheService.sAdd(ApUserBehaviorConstants.FOLLOW_FANS_KEY + dto.getAuthorId(), String.valueOf(userId));
-        //}else {
-        //    // 取消关注
-        //}
-
-
         // 2. 取消关注
         if (dto.getOperation() == ApUserBehaviorConstants.CANCEL_FOLLOW) {
-            // 取消关注
-            QueryWrapper<ApUserFollow> deleteWrapper = new QueryWrapper<ApUserFollow>()
-                    .eq("user_id", userId)
-                    .eq("follow_id", dto.getAuthorId());
-            apUserFollowMapper.delete(deleteWrapper);
+            // 2.1 删Redis
+            cacheService.sRemove(ApUserBehaviorConstants.FOLLOW_USER_KEY + userId, String.valueOf(dto.getAuthorId()));
+            cacheService.sRemove(ApUserBehaviorConstants.FOLLOW_FANS_KEY + dto.getAuthorId(), String.valueOf(userId));
+
+            // 2.2 发Kafka
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", userId);
+            map.put("followId", dto.getAuthorId());
+            map.put("operation", dto.getOperation());
+            kafkaTemplate.send(ApUserBehaviorConstants.FOLLOW_KAFKA_TOPIC, JSON.toJSONString(map));
+            log.info("取消关注 Kafka消息已发送: userId={}, followId={}", userId, dto.getAuthorId());
+
             return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
         }
 
-
+        // 3. 关注 - 校验博主
         // 3.1 查询是否是自媒体博主
         // 3.1.1 先查redis,有直接用,无再feign查询
-        String redisKey = "wemedia:user:" + dto.getAuthorId();
+        String redisKey = "wemedia:author:" + dto.getAuthorId();
         String cached = cacheService.get(redisKey);
         WmUser wmUser = null;
         if (cached != null) {
@@ -148,7 +149,7 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
                 if (result.getData() != null) {
                     wmUser = new ObjectMapper().convertValue(result.getData(), WmUser.class);
                     // 写入Redis
-                    cacheService.setEx(redisKey, JSON.toJSONString(wmUser),30, TimeUnit.MINUTES);
+                    cacheService.setEx(redisKey, JSON.toJSONString(wmUser), 30, TimeUnit.MINUTES);
                     break;
                 }
                 log.warn("Feign第{}次调用wemedia失败，重试...", i + 1);
@@ -176,7 +177,13 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "关注的作者不存在");
         }
 
-        // 3.4 查询用户是否已经关注过该作者
+        // 3.4 查询用户是否已经关注过该作者 (先查Redis)
+        boolean isMember = cacheService.sIsMember(ApUserBehaviorConstants.FOLLOW_USER_KEY + userId, String.valueOf(dto.getAuthorId()));
+        if (isMember) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "已关注该作者");
+        }
+
+        // 3.5 再查MySQL确认
         QueryWrapper<ApUserFollow> followQueryWrapper = new QueryWrapper<ApUserFollow>()
                 .eq("user_id", userId)
                 .eq("follow_id", dto.getAuthorId());
@@ -185,15 +192,18 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST, "已关注该作者");
         }
 
-        // 4. 保存关注关系
-        ApUserFollow apUserFollow = new ApUserFollow();
-        apUserFollow.setUserId(userId);
-        apUserFollow.setFollowId(dto.getAuthorId());
-        apUserFollow.setFollowName(apUserDB.getName()); // 作者名称
-        apUserFollow.setLevel((short) 0); // 关注级别   默认给0
-        apUserFollow.setIsNotice((short) 0); // 是否通知 默认给0
-        apUserFollow.setCreatedTime(new java.util.Date()); // 创建时间
-        apUserFollowMapper.insert(apUserFollow);
+        // 4. 写Redis
+        cacheService.sAdd(ApUserBehaviorConstants.FOLLOW_USER_KEY + userId, String.valueOf(dto.getAuthorId()));
+        cacheService.sAdd(ApUserBehaviorConstants.FOLLOW_FANS_KEY + dto.getAuthorId(), String.valueOf(userId));
+
+        // 5. 发Kafka
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("followId", dto.getAuthorId());
+        map.put("followName", apUserDB.getName());
+        map.put("operation", dto.getOperation());
+        kafkaTemplate.send(ApUserBehaviorConstants.FOLLOW_KAFKA_TOPIC, JSON.toJSONString(map));
+        log.info("关注 Kafka消息已发送: userId={}, followId={}", userId, dto.getAuthorId());
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
