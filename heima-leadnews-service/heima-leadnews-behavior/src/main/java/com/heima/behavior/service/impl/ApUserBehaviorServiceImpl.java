@@ -51,13 +51,13 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
 
-        // 2.TODO 校验用户是否登录
-        //ApUser user = AppThreadLocalUtil.getUser();
-        //if (user == null) {
-        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        //}
-        //Integer userId = user.getId();
-        Integer userId = 4;
+        // 2.校验用户是否登录
+        ApUser user = AppThreadLocalUtil.getUser();
+        if (user == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+        Integer userId = user.getId();
+        //Integer userId = 4;
 
         // 3.判断是点赞还是取消点赞
         if (Objects.equals(dto.getOperation(), ApUserBehaviorConstants.LIKE)){
@@ -145,12 +145,12 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
 
-        // 2.TODO 校验用户是否登录
-        //Integer userId = AppThreadLocalUtil.getUser().getId();
-        //if (userId == null) {
-        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        //}
-        Integer userId = 4;
+        // 2.校验用户是否登录
+        Integer userId = AppThreadLocalUtil.getUser().getId();
+        if (userId == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+        //Integer userId = 4;
 
         // 3.写入Redis
         // 映射type值：前端0→数据库2，前端1→数据库3
@@ -200,12 +200,12 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
 
-        // 2.TODO 校验用户是否登录
-        //Integer userId = AppThreadLocalUtil.getUser().getId();
-        //if (userId == null) {
-        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        //}
-        Integer userId = 4;
+        // 2.校验用户是否登录
+        Integer userId = AppThreadLocalUtil.getUser().getId();
+        if (userId == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+        //Integer userId = 4;
 
         // 3.写入Redis
         if (Objects.equals(dto.getOperation(), ApUserBehaviorConstants.COLLECT)){

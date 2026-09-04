@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/behavior")
+@RequestMapping("/api/v1")
 @Api(tags = "用户行为接口")
 @RequiredArgsConstructor
 public class ApUserBehavior {
