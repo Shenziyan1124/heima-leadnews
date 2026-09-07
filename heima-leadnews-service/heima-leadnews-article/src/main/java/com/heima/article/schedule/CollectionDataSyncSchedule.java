@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,7 @@ public class CollectionDataSyncSchedule {
      * 每5分钟执行一次，同步Redis收藏数据到MySQL
      */
     @Scheduled(fixedRate = 300000, initialDelay = 30000)
-    public void syncCollectionData() {
+    public void syncCollectionData() throws IOException {
         log.info("开始同步Redis收藏数据到MySQL...");
 
         // 1. 扫描所有 collect:article:* 的key
