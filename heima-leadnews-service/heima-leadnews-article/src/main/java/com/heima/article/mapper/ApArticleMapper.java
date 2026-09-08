@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -19,4 +20,11 @@ public interface ApArticleMapper extends BaseMapper<ApArticle> {
      * @return
      */
     List<ApArticle> loadArticleList(ArticleHomeDto dto, Short type);
+
+    /**
+     * 查询前五天的文章
+     * @param dayParam
+     * @return
+     */
+    List<ApArticle> findArticleListByLast5days(@Param("dayParam") Date dayParam);
 }

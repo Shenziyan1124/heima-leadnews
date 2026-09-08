@@ -5,6 +5,7 @@ import com.heima.apis.wemedia.fallback.IWemediaClientFallback;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.pojos.WmUser;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -24,5 +25,9 @@ public interface IWemediaClient {
      */
     @PostMapping("/api/v1/user/getByUserId")
     ResponseResult getWmUserByUserId(@RequestBody Integer userId);
+
+
+    @GetMapping("/api/v1/channel/list")
+    ResponseResult getChannelList();
 
 }

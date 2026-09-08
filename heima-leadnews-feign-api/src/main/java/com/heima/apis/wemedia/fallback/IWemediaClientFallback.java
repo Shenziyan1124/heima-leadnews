@@ -38,6 +38,12 @@ public class IWemediaClientFallback implements FallbackFactory<IWemediaClient> {
                 log.error("调用 wemedia 服务根据用户ID查询自媒体用户失败: userId={}, cause={}", userId, throwable.getMessage(), throwable);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "调用 wemedia 服务 - getWmUserByUserId失败");
             }
+
+            @Override
+            public ResponseResult getChannelList() {
+                log.error("调用 wemedia 服务查询自媒体用户频道列表失败: cause={}", throwable.getMessage(), throwable);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "调用 wemedia 服务 - getChannelList失败");
+            }
         };
     }
 }
