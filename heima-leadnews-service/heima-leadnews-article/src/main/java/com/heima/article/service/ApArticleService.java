@@ -19,6 +19,15 @@ public interface ApArticleService extends IService<ApArticle> {
 
 
     /**
+     * 加载文章列表
+     * @param dto
+     * @param type 1 加载更多 2 加载最新
+     *        firstPage true:查询第一页 false:查询非第一页
+     * @return
+     */
+    public ResponseResult loadArticleList2(ArticleHomeDto dto, Short type,Boolean firstPage);
+
+    /**
      * 保存app端相关文章
      * @param dto
      * @return

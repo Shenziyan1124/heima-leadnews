@@ -1,5 +1,6 @@
 package com.heima.article.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +16,7 @@ import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.article.dtos.ArticleHomeDto;
 import com.heima.model.article.pojos.*;
 import com.heima.model.article.vos.ArticleBehaviorVo;
+import com.heima.model.article.vos.HotArticleVo;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.user.pojos.ApUser;
@@ -89,6 +91,27 @@ public class ApArticleServiceImpl extends ServiceImpl<ApArticleMapper, ApArticle
 
         List<ApArticle> apArticles = apArticleMapper.loadArticleList(dto, type);
         return ResponseResult.okResult(apArticles);
+    }
+
+    /**
+     * 加载文章列表
+     *
+     * @param dto
+     * @param type      1 加载更多 2 加载最新
+     *                  firstPage true:查询第一页 false:查询非第一页
+     * @param firstPage
+     * @return
+     */
+    @Override
+    public ResponseResult loadArticleList2(ArticleHomeDto dto, Short type, Boolean firstPage) {
+        if (firstPage){
+            String jsonStr = cacheService.get(ArticleConstants.HOT_ARTICLE_FIRST_PAGE + dto.getTag());
+            if (StringUtils.isNotBlank(jsonStr)){
+                List<HotArticleVo> hotArticleVos = JSON.parseArray(jsonStr, HotArticleVo.class);
+                return ResponseResult.okResult(hotArticleVos);
+            }
+        }
+        return loadArticleList(dto, type);
     }
 
     /**

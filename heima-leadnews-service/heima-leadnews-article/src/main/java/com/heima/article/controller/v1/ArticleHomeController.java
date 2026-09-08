@@ -24,9 +24,9 @@ public class ArticleHomeController {
      * 加载首页
      * */
     @PostMapping("/load")
-    @ApiOperation(value = "加载文章列表")
+    @ApiOperation(value = "加载首页")
     public ResponseResult load(@RequestBody ArticleHomeDto dto){
-        return apArticleService.loadArticleList(dto, ArticleConstants.LOADTYPE_LOAD_MORE);
+        return apArticleService.loadArticleList2(dto, ArticleConstants.LOADTYPE_LOAD_MORE,true);
     }
 
     /**
