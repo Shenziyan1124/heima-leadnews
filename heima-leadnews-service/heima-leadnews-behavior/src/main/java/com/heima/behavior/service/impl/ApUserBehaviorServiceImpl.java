@@ -3,6 +3,7 @@ package com.heima.behavior.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.heima.behavior.service.ApUserBehaviorService;
 import com.heima.common.constants.ApUserBehaviorConstants;
+import com.heima.common.constants.HotArticleConstants;
 import com.heima.common.redis.CacheService;
 import com.heima.model.behavior.dtos.CollectionBehaviorDto;
 import com.heima.model.behavior.dtos.LikesBehaviorDto;
@@ -10,6 +11,7 @@ import com.heima.model.behavior.dtos.ReadBehaviorDto;
 import com.heima.model.behavior.dtos.UnLikesBehaviorDto;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.mess.UpdateArticleMess;
 import com.heima.model.user.pojos.ApUser;
 import com.heima.utils.thread.AppThreadLocalUtil;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,10 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         Integer userId = user.getId();
         //Integer userId = 4;
 
+        UpdateArticleMess updateArticleMess = new UpdateArticleMess();
+        updateArticleMess.setArticleId(dto.getArticleId().longValue());
+        updateArticleMess.setType(UpdateArticleMess.UpdateArticleType.LIKES);
+
         // 3.判断是点赞还是取消点赞
         if (Objects.equals(dto.getOperation(), ApUserBehaviorConstants.LIKE)){
             // 点赞
@@ -74,6 +80,8 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             map.put("operation", dto.getOperation());
             kafkaTemplate.send(ApUserBehaviorConstants.LIKES_KAFKA_TOPIC, JSON.toJSONString(map));
 
+            updateArticleMess.setAdd(1);
+
         }else {
             // 取消点赞
             // 1.删除redis
@@ -87,7 +95,13 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
             map2.put("type", dto.getType());
             map2.put("operation", dto.getOperation());
             kafkaTemplate.send(ApUserBehaviorConstants.LIKES_KAFKA_TOPIC, JSON.toJSONString(map2));
+
+            updateArticleMess.setAdd(-1);
+
         }
+
+        // 4. 实时计算文章热度,kafkastream
+        kafkaTemplate.send(HotArticleConstants.HOT_ARTICLE_SCORE_TOPIC, JSON.toJSONString(updateArticleMess));
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
 
@@ -125,6 +139,14 @@ public class ApUserBehaviorServiceImpl implements ApUserBehaviorService {
         map.put("readDuration", dto.getReadDuration() == null ? null : dto.getReadDuration());
         map.put("percentage", dto.getPercentage() == null ? null : dto.getPercentage());
         kafkaTemplate.send(ApUserBehaviorConstants.READ_KAFKA_TOPIC, JSON.toJSONString(map));
+
+
+        // 4. 实时计算文章热度,kafkastream
+        UpdateArticleMess updateArticleMess = new UpdateArticleMess();
+        updateArticleMess.setArticleId(dto.getArticleId().longValue());
+        updateArticleMess.setType(UpdateArticleMess.UpdateArticleType.VIEWS);
+        updateArticleMess.setAdd(1);
+        kafkaTemplate.send(HotArticleConstants.HOT_ARTICLE_SCORE_TOPIC, JSON.toJSONString(updateArticleMess));
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }

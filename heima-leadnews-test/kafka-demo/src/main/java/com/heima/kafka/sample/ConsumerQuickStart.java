@@ -27,7 +27,7 @@ public class ConsumerQuickStart {
 
 
         //3.订阅主题
-        consumer.subscribe(Collections.singletonList("topic-first"));
+        consumer.subscribe(Collections.singletonList("itcast-topic-output"));
 
         //4.拉取消息
         while (true) {

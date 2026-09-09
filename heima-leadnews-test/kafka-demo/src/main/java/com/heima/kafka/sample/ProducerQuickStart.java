@@ -36,21 +36,27 @@ public class ProducerQuickStart {
          * 第二个参数：key
          * 第三个参数：value
          */
-        ProducerRecord<String, String> record =
-                new ProducerRecord<String, String>("topic-first", "key-001", "hello kafka");
+
+        for (int i = 0; i < 10; i++){
+            ProducerRecord<String, String> record =
+                    new ProducerRecord<String, String>("itcast-topic-input", "hello kafka"+i);
+            producer.send(record);
+        }
+        //ProducerRecord<String, String> record =
+        //        new ProducerRecord<String, String>("topic-first", "key-001", "hello kafka");
         // 同步发送,容易产生阻塞
-        producer.send(record);
+        //producer.send(record);
         // 异步发送
-        producer.send(record, new Callback() {
-            @Override
-            public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-                if (e != null){
-                    log.error("发送失败", e,"记录信息异常");
-                }
-                log.info("发送成功","记录信息正常");
-                System.out.println(recordMetadata.offset());
-            }
-        });
+        //producer.send(record, new Callback() {
+        //    @Override
+        //    public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+        //        if (e != null){
+        //            log.error("发送失败", e,"记录信息异常");
+        //        }
+        //        log.info("发送成功","记录信息正常");
+        //        System.out.println(recordMetadata.offset());
+        //    }
+        //});
 
         // 4.关闭通道
         producer.close();
