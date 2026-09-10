@@ -14,4 +14,7 @@ public interface IUserClient {
             @RequestParam("userId") Integer userId,
             @RequestParam("followId") Long followId);
 
+    @GetMapping("/api/v1/user/getById")
+    ResponseResult getById(@RequestParam("userId") Integer userId);
+
 }

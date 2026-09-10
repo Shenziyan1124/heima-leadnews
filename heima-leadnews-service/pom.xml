@@ -16,6 +16,7 @@
         <module>heima-leadnews-search</module>
         <module>heima-leadnews-admin</module>
         <module>heima-leadnews-behavior</module>
+        <module>heima-leadnews-comment</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 
