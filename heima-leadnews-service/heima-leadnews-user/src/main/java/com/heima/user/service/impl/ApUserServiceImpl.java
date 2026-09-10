@@ -207,4 +207,13 @@ public class ApUserServiceImpl extends ServiceImpl<ApUserMapper, ApUser> impleme
 
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
+
+    @Override
+    public ResponseResult checkFollow(Integer userId, Long followId) {
+        Integer exists = apUserFollowMapper.selectCount(new QueryWrapper<ApUserFollow>()
+                .eq("user_id", userId)
+                .eq("follow_id", followId)
+        );
+        return ResponseResult.okResult(exists);
+    }
 }

@@ -22,6 +22,12 @@ public class IUserClientFallback implements FallbackFactory<IUserClient> {
                 log.error("feign用户服务调用异常：{}", throwable.getMessage());
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR,"用户服务调用异常");
             }
+
+            @Override
+            public ResponseResult getById(Integer userId) {
+                log.error("feign用户服务调用异常：{}", throwable.getMessage());
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR,"用户服务调用异常");
+            }
         };
     }
 }

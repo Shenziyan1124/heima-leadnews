@@ -7,17 +7,9 @@ import com.heima.model.user.dtos.UserRelationDto;
 import com.heima.model.user.pojos.ApUser;
 
 public interface ApUserService extends IService<ApUser> {
-    /**
-     * 登录
-     * @param dto
-     * @return
-     */
     ResponseResult login(LoginDto dto);
 
-    /**
-     * 用户关注
-     * @param dto
-     * @return
-     */
     ResponseResult userFollow(UserRelationDto dto);
+
+    ResponseResult checkFollow(Integer userId, Long followId);
 }
