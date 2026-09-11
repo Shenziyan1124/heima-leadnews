@@ -1,8 +1,12 @@
 package com.heima.wemedia.service.impl;
 
+import com.heima.apis.article.IArticleClient;
 import com.heima.apis.comment.ICommentClient;
 import com.heima.model.common.dtos.PageResponseResult;
+import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentStatusDto;
 import com.heima.wemedia.service.WmCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WmCommentServiceImpl implements WmCommentService {
 
     private final ICommentClient iCommentClient;
+    private final IArticleClient iArticleClient;
 
     /**
      * 评论列表
@@ -26,5 +31,22 @@ public class WmCommentServiceImpl implements WmCommentService {
     @Override
     public PageResponseResult findNewsComments(WmCommentListDto dto) {
         return iCommentClient.findNewsComments(dto);
+    }
+
+    /**
+     * 打开或关闭评论
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult updateCommentStatus(WmCommentStatusDto dto) {
+        if (dto == null || dto.getArticleId() == null ||
+                dto.getOperation() == null || dto.getOperation() < 0 || dto.getOperation() > 1) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        Boolean isComment = (dto.getOperation() == 1);
+        return iArticleClient.updateCommentStatus(dto.getArticleId(), isComment);
     }
 }

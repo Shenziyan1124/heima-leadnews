@@ -15,11 +15,6 @@ public class IArticleClientFallback implements FallbackFactory<IArticleClient> {
     public IArticleClient create(Throwable cause) {
         return new IArticleClient() {
             @Override
-            /**
-             * 保存文章
-             * @param dto
-             * @return
-             */
             public ResponseResult saveArticle(ArticleDto dto) {
                 log.error("调用 article 服务失败: {}", dto.toString(), cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
@@ -30,11 +25,18 @@ public class IArticleClientFallback implements FallbackFactory<IArticleClient> {
                 log.error("wemedia 调用 article-getArticleCountByChannelId 服务失败: {}", id);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
             }
+
+            @Override
+            public ResponseResult getCommentStatus(Long articleId) {
+                log.error("调用 article-getCommentStatus 服务失败: {}", articleId, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
+            }
+
+            @Override
+            public ResponseResult updateCommentStatus(Long articleId, Boolean isComment) {
+                log.error("调用 article-updateCommentStatus 服务失败: {} {}", articleId, isComment, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
+            }
         };
     }
-
-//    public ResponseResult saveArticle(ArticleDto dto) {
-//        log.error("调用 article 服务失败: {}", dto.toString());
-//        return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
-//    }
 }

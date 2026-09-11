@@ -3,6 +3,7 @@ package com.heima.comment.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.heima.apis.article.IArticleClient;
 import com.heima.apis.wemedia.IWemediaClient;
 import com.heima.comment.service.ApCommentManageService;
 import com.heima.model.common.dtos.PageResponseResult;
@@ -28,6 +29,7 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
 
     private final MongoTemplate mongoTemplate;
     private final IWemediaClient iWemediaClient;
+    private final IArticleClient iArticleClient;
 
     @Override
     public PageResponseResult findNewsComments(WmCommentListDto dto) {
@@ -74,7 +76,7 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
                 pageAggregation, "ap_comment", Map.class);
         List<Map> mappedResults = results.getMappedResults();
 
-        // 4. 转换为VO，查询文章标题
+        // 4. 转换为VO，查询文章标题和评论状态
         List<WmCommentVo> voList = new ArrayList<>();
         for (Map map : mappedResults) {
             WmCommentVo vo = new WmCommentVo();
@@ -86,9 +88,8 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
             } else if (ct instanceof Long) {
                 vo.setCreatedTime((Long) ct);
             }
-            vo.setIsComment(true);
 
-            // 根据articleId查询文章标题
+            // 查询文章标题
             try {
                 ResponseResult titleResult = iWemediaClient.getNewsByArticleId(vo.getId());
                 if (titleResult != null && titleResult.getData() != null) {
@@ -96,6 +97,19 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
                 }
             } catch (Exception e) {
                 log.warn("查询文章标题失败: articleId={}", vo.getId(), e);
+            }
+
+            // 查询评论状态
+            try {
+                ResponseResult commentResult = iArticleClient.getCommentStatus(vo.getId());
+                if (commentResult != null && commentResult.getData() != null) {
+                    vo.setIsComment((Boolean) commentResult.getData());
+                } else {
+                    vo.setIsComment(true);
+                }
+            } catch (Exception e) {
+                log.warn("查询评论状态失败: articleId={}", vo.getId(), e);
+                vo.setIsComment(true);
             }
 
             voList.add(vo);

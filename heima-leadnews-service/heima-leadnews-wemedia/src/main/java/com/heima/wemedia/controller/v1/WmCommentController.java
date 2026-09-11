@@ -2,12 +2,15 @@ package com.heima.wemedia.controller.v1;
 
 
 import com.heima.model.common.dtos.PageResponseResult;
+import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentStatusDto;
 import com.heima.wemedia.service.WmCommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +24,14 @@ public class WmCommentController {
 
     @PostMapping("/find_news_comments")
     @ApiOperation("评论列表")
-    public PageResponseResult findNewsComments(WmCommentListDto dto) {
+    public PageResponseResult findNewsComments(@RequestBody WmCommentListDto dto) {
         return wmCommentService.findNewsComments(dto);
     }
+
+    @PostMapping("/update_comment_status")
+    @ApiOperation("打开或关闭评论")
+    public ResponseResult updateCommentStatus(@RequestBody WmCommentStatusDto dto) {
+        return wmCommentService.updateCommentStatus(dto);
+    }
+
 }
