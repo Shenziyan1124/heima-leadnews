@@ -75,6 +75,4 @@ public class WmNewsController {
     public ResponseResult adminAuthPass(@RequestBody WmAdminNewsReqDto dto){
         return wmNewsService.adminAuthPass(dto);
     }
-
-
 }
