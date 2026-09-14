@@ -3,6 +3,7 @@ package com.heima.wemedia.controller.v1;
 
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentStatusDto;
 import com.heima.wemedia.service.WmCommentService;
@@ -23,8 +24,8 @@ public class WmCommentController {
     private final WmCommentService wmCommentService;
 
     @PostMapping("/find_news_comments")
-    @ApiOperation("评论列表")
-    public PageResponseResult findNewsComments(@RequestBody WmCommentListDto dto) {
+    @ApiOperation("文章评论列表")
+    public ResponseResult findNewsComments(@RequestBody WmCommentListDto dto) {
         return wmCommentService.findNewsComments(dto);
     }
 
@@ -32,6 +33,12 @@ public class WmCommentController {
     @ApiOperation("打开或关闭评论")
     public ResponseResult updateCommentStatus(@RequestBody WmCommentStatusDto dto) {
         return wmCommentService.updateCommentStatus(dto);
+    }
+
+    @PostMapping("/list")
+    @ApiOperation("文章详情评论列表")
+    public ResponseResult findCommentListByArticleId(@RequestBody WmArticleCommentListDto dto) {
+        return wmCommentService.findCommentListByArticleId(dto);
     }
 
 }

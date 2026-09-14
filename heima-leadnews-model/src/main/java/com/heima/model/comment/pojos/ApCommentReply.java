@@ -12,7 +12,7 @@ import java.util.Date;
  * 评论回复表（MongoDB）
  */
 @Data
-@Document(collection = "ap_comment_repay")
+@Document(collection = "ap_comment_reply")
 public class ApCommentReply implements Serializable {
 
     @Id

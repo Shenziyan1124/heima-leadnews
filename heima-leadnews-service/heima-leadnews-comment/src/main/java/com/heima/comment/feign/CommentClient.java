@@ -3,6 +3,8 @@ package com.heima.comment.feign;
 import com.heima.apis.comment.ICommentClient;
 import com.heima.comment.service.ApCommentManageService;
 import com.heima.model.common.dtos.PageResponseResult;
+import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +16,12 @@ public class CommentClient implements ICommentClient {
     private ApCommentManageService apCommentManageService;
 
     @Override
-    public PageResponseResult findNewsComments(WmCommentListDto dto) {
+    public ResponseResult findNewsComments(WmCommentListDto dto) {
         return apCommentManageService.findNewsComments(dto);
+    }
+
+    @Override
+    public ResponseResult findCommentListByArticleId(WmArticleCommentListDto dto) {
+        return apCommentManageService.findCommentListByArticleId(dto);
     }
 }

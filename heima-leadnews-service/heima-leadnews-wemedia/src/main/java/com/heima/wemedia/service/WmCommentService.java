@@ -2,6 +2,7 @@ package com.heima.wemedia.service;
 
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentStatusDto;
 
@@ -12,7 +13,7 @@ public interface WmCommentService {
      * @param dto
      * @return
      */
-    PageResponseResult findNewsComments(WmCommentListDto dto);
+    ResponseResult findNewsComments(WmCommentListDto dto);
 
     /**
      * 打开或关闭评论
@@ -20,4 +21,11 @@ public interface WmCommentService {
      * @return
      */
     ResponseResult updateCommentStatus(WmCommentStatusDto dto);
+
+    /**
+     * 根据文章id查询评论列表
+     * @param dto
+     * @return
+     */
+    ResponseResult findCommentListByArticleId(WmArticleCommentListDto dto);
 }

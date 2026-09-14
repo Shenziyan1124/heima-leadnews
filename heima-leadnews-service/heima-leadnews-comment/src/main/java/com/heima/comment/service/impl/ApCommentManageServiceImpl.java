@@ -4,17 +4,27 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.heima.apis.article.IArticleClient;
+import com.heima.apis.user.IUserClient;
 import com.heima.apis.wemedia.IWemediaClient;
 import com.heima.comment.service.ApCommentManageService;
+import com.heima.model.comment.pojos.ApComment;
+import com.heima.model.comment.pojos.ApCommentReply;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.vos.ArticleCommentVo;
+import com.heima.model.wemedia.vos.CommentRepayVo;
+import com.heima.model.wemedia.vos.CommentVo;
 import com.heima.model.wemedia.vos.WmCommentVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,9 +40,10 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
     private final MongoTemplate mongoTemplate;
     private final IWemediaClient iWemediaClient;
     private final IArticleClient iArticleClient;
+    private final IUserClient iUserClient;
 
     @Override
-    public PageResponseResult findNewsComments(WmCommentListDto dto) {
+    public ResponseResult findNewsComments(WmCommentListDto dto) {
         dto.checkParam();
 
         // 1. 构建查询条件
@@ -119,6 +130,80 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
         PageResponseResult pageResponseResult = new PageResponseResult(
                 dto.getPage(), dto.getSize(), total);
         pageResponseResult.setData(voList);
+        return pageResponseResult;
+    }
+
+    /**
+     * 根据dto查询文章详情评论列表
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult findCommentListByArticleId(WmArticleCommentListDto dto) {
+        // 1. 参数校验
+        dto.checkParam();
+
+        List<ArticleCommentVo> articleCommentList = new ArrayList<>();
+
+        // 2. 根据articleId 请求ap_comment的entryId
+        Query query = new Query();
+        query.addCriteria(Criteria.where("entryId").is(dto.getArticleId()));
+        List<ApComment> commentList = mongoTemplate.find(query, ApComment.class, "ap_comment");
+
+
+        // 3. 根据entryId 查询ap_comment_repay 每条评论的回复
+        for (ApComment apComment : commentList) {
+
+            // 3.1 每次循环创建query
+            Query replyQuery = new Query();
+            replyQuery.addCriteria(Criteria.where("commentId").is(apComment.get_id()));
+
+            // 3.2 查询该评论的回复列表
+            List<ApCommentReply> replyList =
+                    mongoTemplate.find(
+                            replyQuery,
+                            ApCommentReply.class,
+                            "ap_comment_reply");
+
+            // 3.3 创建articleCommentVo
+            ArticleCommentVo articleCommentVo = new ArticleCommentVo();
+
+            // 3.4 把apcomment转成commentvo,放到articleCommentVo中的apComments字段
+            CommentVo commentVo = new CommentVo();
+            commentVo.setId(apComment.get_id());
+            commentVo.setAuthorId(apComment.getAuthorId());
+            commentVo.setAuthorName(apComment.getAuthorName());
+            commentVo.setContent(apComment.getContent());
+            commentVo.setImage(null);
+            commentVo.setLikes(apComment.getLikes());
+            commentVo.setReply(apComment.getReply());
+            commentVo.setFlag(apComment.getFlag());
+            commentVo.setOrd(null);
+            commentVo.setCreatedTime(apComment.getCreatedTime().getTime());
+            commentVo.setUpdatedTime(apComment.getCreatedTime().getTime());
+
+            articleCommentVo.setApComments(commentVo);
+
+            // 3.5  把ApCommentReply转成commentrepayvo,放到articleCommentVo中的apCommentReplies字段
+            List<CommentRepayVo> replyVoList = new ArrayList<>();
+            for (ApCommentReply commentReply : replyList){
+                CommentRepayVo commentRepayVo = new CommentRepayVo();
+                BeanUtils.copyProperties(commentReply, commentRepayVo);
+                replyVoList.add(commentRepayVo);
+            }
+            articleCommentVo.setApCommentRepays(replyVoList);
+
+            // 3.6 添加到articleCommentList
+            articleCommentList.add(articleCommentVo);
+
+        }
+
+
+        // 4. 封装分页结果
+        PageResponseResult pageResponseResult = new PageResponseResult(
+                dto.getPage(), dto.getSize(), articleCommentList.size());
+        pageResponseResult.setData(articleCommentList);
         return pageResponseResult;
     }
 }

@@ -5,6 +5,7 @@ import com.heima.apis.comment.ICommentClient;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentStatusDto;
 import com.heima.wemedia.service.WmCommentService;
@@ -29,7 +30,7 @@ public class WmCommentServiceImpl implements WmCommentService {
      * @return
      */
     @Override
-    public PageResponseResult findNewsComments(WmCommentListDto dto) {
+    public ResponseResult findNewsComments(WmCommentListDto dto) {
         return iCommentClient.findNewsComments(dto);
     }
 
@@ -48,5 +49,20 @@ public class WmCommentServiceImpl implements WmCommentService {
 
         Boolean isComment = (dto.getOperation() == 1);
         return iArticleClient.updateCommentStatus(dto.getArticleId(), isComment);
+    }
+
+    /**
+     * 根据文章id查询评论列表
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult findCommentListByArticleId(WmArticleCommentListDto dto) {
+        if (dto == null || dto.getArticleId() == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        return iCommentClient.findCommentListByArticleId(dto);
     }
 }
