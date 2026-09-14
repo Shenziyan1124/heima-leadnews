@@ -196,6 +196,10 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
             for (ApCommentReply commentReply : replyList){
                 CommentRepayVo commentRepayVo = new CommentRepayVo();
                 BeanUtils.copyProperties(commentReply, commentRepayVo);
+                commentRepayVo.setId(commentReply.get_id());
+                commentRepayVo.setLikes(commentReply.getLikes());
+                commentRepayVo.setCreatedTime(commentReply.getCreatedTime().getTime());
+                commentRepayVo.setUpdatedTime(commentReply.getUpdatedTime().getTime());
                 replyVoList.add(commentRepayVo);
             }
             articleCommentVo.setApCommentRepays(replyVoList);
@@ -286,5 +290,34 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
 
         return ResponseResult.okResult(apComment.getLikes());
 
+    }
+
+    /**
+     * 删除评论
+     *
+     * @param commentId
+     * @return
+     */
+    @Override
+    public ResponseResult delComment(String commentId) {
+        mongoTemplate.remove(
+                Query.query(Criteria.where("_id").is(commentId)),
+                ApComment.class, "ap_comment");
+
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    /**
+     * 删除评论回复
+     *
+     * @param commentRepayId
+     * @return
+     */
+    @Override
+    public ResponseResult delCommentReplay(String commentRepayId) {
+        mongoTemplate.remove(
+                Query.query(Criteria.where("_id").is(commentRepayId)),
+                ApCommentReply.class, "ap_comment_reply");
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }

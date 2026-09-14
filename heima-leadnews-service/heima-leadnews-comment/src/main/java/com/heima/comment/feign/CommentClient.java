@@ -40,4 +40,14 @@ public class CommentClient implements ICommentClient {
 
         return apCommentManageService.authorLike(dto);
     }
+
+    @Override
+    public ResponseResult delComment(String commentId) {
+        return apCommentManageService.delComment(commentId);
+    }
+
+    @Override
+    public ResponseResult delCommentReplay(String commentRepayId) {
+        return apCommentManageService.delCommentReplay(commentRepayId);
+    }
 }

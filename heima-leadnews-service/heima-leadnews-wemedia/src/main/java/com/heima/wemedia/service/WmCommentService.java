@@ -40,4 +40,18 @@ public interface WmCommentService {
      * @return
      */
     ResponseResult authorLike(WmCommentLikeDto dto);
+
+    /**
+     * 删除评论
+     * @param commentId
+     * @return
+     */
+    ResponseResult delComment(String commentId);
+
+    /**
+     * 删除评论回复
+     * @param commentRepayId
+     * @return
+     */
+    ResponseResult delCommentReplay(String commentRepayId);
 }

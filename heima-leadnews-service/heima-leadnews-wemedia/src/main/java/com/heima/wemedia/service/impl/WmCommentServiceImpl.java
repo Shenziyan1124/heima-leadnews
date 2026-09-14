@@ -92,4 +92,32 @@ public class WmCommentServiceImpl implements WmCommentService {
 
         return iCommentClient.authorLike(dto);
     }
+
+    /**
+     * 删除评论
+     *
+     * @param commentId
+     * @return
+     */
+    @Override
+    public ResponseResult delComment(String commentId) {
+        if (commentId == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+        return iCommentClient.delComment(commentId);
+    }
+
+    /**
+     * 删除评论回复
+     *
+     * @param commentRepayId
+     * @return
+     */
+    @Override
+    public ResponseResult delCommentReplay(String commentRepayId) {
+        if (commentRepayId == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+        return iCommentClient.delCommentReplay(commentRepayId);
+    }
 }

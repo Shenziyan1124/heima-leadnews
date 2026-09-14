@@ -45,6 +45,18 @@ public class ICommentClientFallback implements FallbackFactory<ICommentClient> {
                 log.error("调用 comment 服务失败,作者评论点赞: {}", dto, cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
             }
+
+            @Override
+            public ResponseResult delComment(String commentId) {
+                log.error("调用 comment 服务失败,删除评论: {}", commentId, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
+            }
+
+            @Override
+            public ResponseResult delCommentReplay(String commentRepayId) {
+                log.error("调用 comment 服务失败,删除评论回复: {}", commentRepayId, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
+            }
         };
     }
 }

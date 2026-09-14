@@ -7,10 +7,7 @@ import com.heima.wemedia.service.WmCommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/comment/manage")
@@ -49,6 +46,18 @@ public class WmCommentController {
     @ApiOperation("作者评论点赞")
     public ResponseResult authorLike(@RequestBody WmCommentLikeDto dto) {
         return wmCommentService.authorLike(dto);
+    }
+
+    @DeleteMapping("/del_comment/{commentId}")
+    @ApiOperation("删除评论")
+    public ResponseResult delComment(@PathVariable("commentId") String commentId) {
+        return wmCommentService.delComment(commentId);
+    }
+
+    @DeleteMapping("/del_comment_repay/{commentRepayId}")
+    @ApiOperation("删除评论回复")
+    public ResponseResult delCommentReplay(@PathVariable("commentRepayId") String commentRepayId) {
+        return wmCommentService.delCommentReplay(commentRepayId);
     }
 
 }

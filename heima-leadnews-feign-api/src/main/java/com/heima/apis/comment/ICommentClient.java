@@ -11,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -32,4 +33,12 @@ public interface ICommentClient {
     @ApiOperation("作者评论点赞")
     @PostMapping("/api/v1/comment/manage/like")
     ResponseResult authorLike(@RequestBody WmCommentLikeDto dto);
+
+    @ApiOperation("删除评论")
+    @PostMapping("/api/v1/comment/manage/del_comment/{commentId}")
+    ResponseResult delComment(@PathVariable("commentId") String commentId);
+
+    @ApiOperation("删除评论回复")
+    @PostMapping("/api/v1/comment/manage/del_comment_replay/{commentRepayId}")
+    ResponseResult delCommentReplay(@PathVariable("commentRepayId") String commentRepayId);
 }
