@@ -3,6 +3,7 @@ package com.heima.comment.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heima.apis.article.IArticleClient;
 import com.heima.apis.user.IUserClient;
 import com.heima.apis.wemedia.IWemediaClient;
@@ -11,12 +12,16 @@ import com.heima.model.comment.pojos.ApComment;
 import com.heima.model.comment.pojos.ApCommentReply;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.user.pojos.ApUser;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 import com.heima.model.wemedia.vos.ArticleCommentVo;
 import com.heima.model.wemedia.vos.CommentRepayVo;
 import com.heima.model.wemedia.vos.CommentVo;
 import com.heima.model.wemedia.vos.WmCommentVo;
+import com.heima.utils.thread.AppThreadLocalUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -205,5 +210,48 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
                 dto.getPage(), dto.getSize(), articleCommentList.size());
         pageResponseResult.setData(articleCommentList);
         return pageResponseResult;
+    }
+
+    /**
+     * 评论回复
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult commentReply(WmCommentReplyDto dto) {
+
+        // 1.获取登录信息
+        ApUser user = AppThreadLocalUtil.getUser();
+        if (user == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+
+        // 2.保存评论回复
+        ApCommentReply apCommentReply = new ApCommentReply();
+        apCommentReply.setCommentId(dto.getCommentId());
+        apCommentReply.setAuthorId(user.getId());
+        apCommentReply.setContent(dto.getContent());
+        apCommentReply.setCreatedTime(new Date());
+        apCommentReply.setUpdatedTime(new Date());
+
+
+        try {
+            ResponseResult userClientById = iUserClient.getById(user.getId());
+            if (userClientById != null && userClientById.getData() != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                ApUser user1 = mapper.convertValue(userClientById.getData(), ApUser.class);
+                apCommentReply.setAuthorName(user1.getName());
+            }
+        } catch (Exception e) {
+            log.error("查询用户信息失败: {}", dto, e);
+            apCommentReply.setAuthorName("匿名用户");
+        }
+
+        mongoTemplate.save(apCommentReply);
+
+        // 3.返回结果
+        return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }

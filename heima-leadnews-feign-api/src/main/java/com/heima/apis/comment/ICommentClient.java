@@ -5,6 +5,10 @@ import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentReplyDto;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface ICommentClient {
 
     @PostMapping("/api/v1/comment/manage/find_news_comments")
+    @ApiOperation("查询所有文章评论的列表")
     ResponseResult findNewsComments(@RequestBody WmCommentListDto dto);
 
     @PostMapping("/api/v1/comment/manage/list")
+    @ApiOperation("根据文章id查询评论列表")
     ResponseResult findCommentListByArticleId(@RequestBody WmArticleCommentListDto dto);
+
+    @ApiOperation("评论回复")
+    @PostMapping("/api/v1/comment/manage/comment_repay")
+    ResponseResult commentReply(@RequestBody WmCommentReplyDto dto);
 }

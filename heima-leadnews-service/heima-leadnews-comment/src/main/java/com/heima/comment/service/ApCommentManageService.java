@@ -4,6 +4,7 @@ import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 
 public interface ApCommentManageService {
     /**
@@ -19,4 +20,11 @@ public interface ApCommentManageService {
      * @return
      */
     ResponseResult findCommentListByArticleId(WmArticleCommentListDto dto);
+
+    /**
+     * 评论回复
+     * @param dto
+     * @return
+     */
+    ResponseResult commentReply(WmCommentReplyDto dto);
 }

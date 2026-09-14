@@ -6,6 +6,7 @@ import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,12 @@ public class ICommentClientFallback implements FallbackFactory<ICommentClient> {
                 PageResponseResult result = new PageResponseResult();
                 result.setTotal(0);
                 return result;
+            }
+
+            @Override
+            public ResponseResult commentReply(WmCommentReplyDto dto) {
+                log.error("调用 comment 服务失败,评论回复: {}", dto, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
             }
         };
     }
