@@ -4,6 +4,7 @@ import com.heima.apis.comment.fallback.ICommentClientFallback;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentLikeDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 import io.swagger.annotations.Api;
@@ -27,4 +28,8 @@ public interface ICommentClient {
     @ApiOperation("评论回复")
     @PostMapping("/api/v1/comment/manage/comment_repay")
     ResponseResult commentReply(@RequestBody WmCommentReplyDto dto);
+
+    @ApiOperation("作者评论点赞")
+    @PostMapping("/api/v1/comment/manage/like")
+    ResponseResult authorLike(@RequestBody WmCommentLikeDto dto);
 }

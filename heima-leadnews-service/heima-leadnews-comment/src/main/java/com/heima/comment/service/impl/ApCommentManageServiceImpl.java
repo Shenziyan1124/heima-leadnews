@@ -15,6 +15,7 @@ import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.user.pojos.ApUser;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentLikeDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 import com.heima.model.wemedia.vos.ArticleCommentVo;
@@ -253,5 +254,37 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
 
         // 3.返回结果
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
+    }
+
+    /**
+     * 作者点赞
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult authorLike(WmCommentLikeDto dto) {
+        // 获取当前登录用户
+        //ApUser user = AppThreadLocalUtil.getUser();
+        //if (user == null) {
+        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        //}
+        // 查commentid对应的评论
+        ApComment apComment = mongoTemplate.findById(dto.getCommentId(), ApComment.class, "ap_comment");
+        if (apComment == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST);
+        }
+
+        if (dto.getOperation() == 1){
+            // 取消点赞
+            apComment.setLikes(apComment.getLikes() - 1);
+        }else {
+            apComment.setLikes(apComment.getLikes() + 1);
+        }
+
+        mongoTemplate.save(apComment);
+
+        return ResponseResult.okResult(apComment.getLikes());
+
     }
 }

@@ -2,10 +2,7 @@ package com.heima.wemedia.controller.v1;
 
 
 import com.heima.model.common.dtos.ResponseResult;
-import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentReplyDto;
-import com.heima.model.wemedia.dtos.WmCommentStatusDto;
+import com.heima.model.wemedia.dtos.*;
 import com.heima.wemedia.service.WmCommentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +42,13 @@ public class WmCommentController {
     @ApiOperation("作者回复评论")
     public ResponseResult commentRepay(@RequestBody WmCommentReplyDto dto) {
         return wmCommentService.commentReply(dto);
+    }
+
+
+    @PostMapping("/like")
+    @ApiOperation("作者评论点赞")
+    public ResponseResult authorLike(@RequestBody WmCommentLikeDto dto) {
+        return wmCommentService.authorLike(dto);
     }
 
 }

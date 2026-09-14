@@ -5,6 +5,7 @@ import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentLikeDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 import feign.hystrix.FallbackFactory;
@@ -36,6 +37,12 @@ public class ICommentClientFallback implements FallbackFactory<ICommentClient> {
             @Override
             public ResponseResult commentReply(WmCommentReplyDto dto) {
                 log.error("调用 comment 服务失败,评论回复: {}", dto, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
+            }
+
+            @Override
+            public ResponseResult authorLike(WmCommentLikeDto dto) {
+                log.error("调用 comment 服务失败,作者评论点赞: {}", dto, cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
             }
         };

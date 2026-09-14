@@ -3,6 +3,7 @@ package com.heima.comment.service;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
+import com.heima.model.wemedia.dtos.WmCommentLikeDto;
 import com.heima.model.wemedia.dtos.WmCommentListDto;
 import com.heima.model.wemedia.dtos.WmCommentReplyDto;
 
@@ -27,4 +28,11 @@ public interface ApCommentManageService {
      * @return
      */
     ResponseResult commentReply(WmCommentReplyDto dto);
+
+    /**
+     * 作者点赞
+     * @param dto
+     * @return
+     */
+    ResponseResult authorLike(WmCommentLikeDto dto);
 }

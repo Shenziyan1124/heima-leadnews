@@ -2,10 +2,7 @@ package com.heima.wemedia.service;
 
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
-import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentReplyDto;
-import com.heima.model.wemedia.dtos.WmCommentStatusDto;
+import com.heima.model.wemedia.dtos.*;
 
 public interface WmCommentService {
 
@@ -36,4 +33,11 @@ public interface WmCommentService {
      * @return
      */
     ResponseResult commentReply(WmCommentReplyDto dto);
+
+    /**
+     * 作者评论点赞
+     * @param dto
+     * @return
+     */
+    ResponseResult authorLike(WmCommentLikeDto dto);
 }

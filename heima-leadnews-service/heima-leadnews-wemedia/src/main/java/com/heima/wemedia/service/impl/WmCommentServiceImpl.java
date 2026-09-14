@@ -5,10 +5,7 @@ import com.heima.apis.comment.ICommentClient;
 import com.heima.model.common.dtos.PageResponseResult;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
-import com.heima.model.wemedia.dtos.WmArticleCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentListDto;
-import com.heima.model.wemedia.dtos.WmCommentReplyDto;
-import com.heima.model.wemedia.dtos.WmCommentStatusDto;
+import com.heima.model.wemedia.dtos.*;
 import com.heima.wemedia.service.WmCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,5 +76,20 @@ public class WmCommentServiceImpl implements WmCommentService {
             return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
         }
         return iCommentClient.commentReply(dto);
+    }
+
+    /**
+     * 作者评论点赞
+     *
+     * @param dto
+     * @return
+     */
+    public ResponseResult authorLike(WmCommentLikeDto dto) {
+        if (dto == null || dto.getCommentId() == null ||
+                dto.getOperation() == null || dto.getOperation() < 0 || dto.getOperation() > 1){
+            return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+        }
+
+        return iCommentClient.authorLike(dto);
     }
 }
