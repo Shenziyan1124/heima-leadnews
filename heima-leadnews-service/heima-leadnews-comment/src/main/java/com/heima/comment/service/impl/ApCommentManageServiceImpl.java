@@ -31,6 +31,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -269,27 +270,40 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
     @Override
     public ResponseResult authorLike(WmCommentLikeDto dto) {
         // 获取当前登录用户
-        //ApUser user = AppThreadLocalUtil.getUser();
-        //if (user == null) {
-        //    return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
-        //}
-        // 查commentid对应的评论
+        ApUser user = AppThreadLocalUtil.getUser();
+        if (user == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 检查评论是否存在
         ApComment apComment = mongoTemplate.findById(dto.getCommentId(), ApComment.class, "ap_comment");
         if (apComment == null) {
             return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST);
         }
 
-        if (dto.getOperation() == 1){
-            // 取消点赞
-            apComment.setLikes(apComment.getLikes() - 1);
-        }else {
-            apComment.setLikes(apComment.getLikes() + 1);
+        // 使用原子操作更新点赞数，避免并发问题
+        Update update = new Update();
+        if (dto.getOperation() == 1) {
+            // 取消点赞：likes 最小为 0
+            update.inc("likes", -1);
+            mongoTemplate.updateFirst(
+                    Query.query(Criteria.where("_id").is(dto.getCommentId()).and("likes").gt(0)),
+                    update,
+                    "ap_comment"
+            );
+        } else {
+            // 点赞
+            update.inc("likes", 1);
+            mongoTemplate.updateFirst(
+                    Query.query(Criteria.where("_id").is(dto.getCommentId())),
+                    update,
+                    "ap_comment"
+            );
         }
 
-        mongoTemplate.save(apComment);
-
+        // 查询更新后的点赞数
+        apComment = mongoTemplate.findById(dto.getCommentId(), ApComment.class, "ap_comment");
         return ResponseResult.okResult(apComment.getLikes());
-
     }
 
     /**
@@ -303,7 +317,6 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
         mongoTemplate.remove(
                 Query.query(Criteria.where("_id").is(commentId)),
                 ApComment.class, "ap_comment");
-
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 
@@ -315,9 +328,24 @@ public class ApCommentManageServiceImpl implements ApCommentManageService {
      */
     @Override
     public ResponseResult delCommentReplay(String commentRepayId) {
+        // 先查询回复，获取父评论ID
+        ApCommentReply reply = mongoTemplate.findById(commentRepayId, ApCommentReply.class, "ap_comment_reply");
+        if (reply == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.DATA_NOT_EXIST);
+        }
+
+        // 删除回复
         mongoTemplate.remove(
                 Query.query(Criteria.where("_id").is(commentRepayId)),
                 ApCommentReply.class, "ap_comment_reply");
+
+        // 父评论回复数 -1
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("_id").is(reply.getCommentId())),
+                new Update().inc("reply", -1),
+                ApComment.class, "ap_comment"
+        );
+
         return ResponseResult.okResult(AppHttpCodeEnum.SUCCESS);
     }
 }
