@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.heima.apis.article.IArticleClient;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.wemedia.dtos.WmArticleListDto;
 import com.heima.model.wemedia.pojos.WmNewsStatistics;
 import com.heima.model.wemedia.pojos.WmUser;
+import com.heima.model.wemedia.vos.WmArticleStatVo;
 import com.heima.utils.thread.WmThreadLocalUtil;
 import com.heima.wemedia.mapper.WmNewsStatisticsMapper;
 import com.heima.wemedia.service.WmStatisticsService;
@@ -91,5 +93,31 @@ public class WmStatisticsServiceImpl extends ServiceImpl<WmNewsStatisticsMapper,
         }
 
         return ResponseResult.okResult(wmNewsStatistics);
+    }
+
+    /**
+     * 根据作者查询图文数据
+     *
+     * @param dto
+     * @return
+     */
+    @Override
+    public ResponseResult getAuthorNewsPage(WmArticleListDto dto) {
+        dto.checkParam();
+
+        // 0.获取当前用户
+        WmUser user = WmThreadLocalUtil.getUser();
+        if (user == null) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.NEED_LOGIN);
+        }
+
+        // 1. 调用文章服务查询作者图文数据
+        try {
+            ResponseResult result = iArticleClient.getAuthorNewsPage(dto, user.getId(), dto.getOrderType());
+            return result;
+        } catch (Exception e) {
+            log.error("查询作者图文数据失败: {}", dto, e);
+            return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR);
+        }
     }
 }

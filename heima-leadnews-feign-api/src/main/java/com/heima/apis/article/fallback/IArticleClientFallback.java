@@ -4,6 +4,7 @@ import com.heima.apis.article.IArticleClient;
 import com.heima.model.article.dtos.ArticleDto;
 import com.heima.model.common.dtos.ResponseResult;
 import com.heima.model.common.enums.AppHttpCodeEnum;
+import com.heima.model.wemedia.dtos.WmArticleListDto;
 import lombok.extern.slf4j.Slf4j;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,21 @@ public class IArticleClientFallback implements FallbackFactory<IArticleClient> {
                 log.error("调用 article-getNewsDimension 服务失败: {} {} {}", beginDate, endDate, id, cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
             }
+
+            /**
+             * 获取作者文章分页列表
+             *
+             * @param dto
+             * @param id
+             * @param orderType
+             * @return
+             */
+            @Override
+            public ResponseResult getAuthorNewsPage(WmArticleListDto dto, Integer id, String orderType) {
+                log.error("调用 article-getAuthorNewsPage 服务失败: {} {} {}", dto.toString(), id, orderType, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
+            }
+
         };
     }
 }
