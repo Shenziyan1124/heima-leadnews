@@ -6,6 +6,8 @@ import com.heima.model.common.dtos.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+
 @FeignClient(value = "leadnews-article",fallbackFactory = IArticleClientFallback.class)
 public interface IArticleClient {
 
@@ -41,4 +43,9 @@ public interface IArticleClient {
      */
     @PostMapping("/api/v1/article/comment_status")
     ResponseResult updateCommentStatus(@RequestParam("articleId") Long articleId, @RequestParam("isComment") Boolean isComment);
+
+    @GetMapping("/api/v1/article/newsDimension")
+    ResponseResult getNewsDimension(@RequestParam(value = "beginDate", required = false) String beginDate,
+                                    @RequestParam(value = "endDate", required = false) String endDate,
+                                    @RequestParam("id") Integer id) throws ParseException;
 }

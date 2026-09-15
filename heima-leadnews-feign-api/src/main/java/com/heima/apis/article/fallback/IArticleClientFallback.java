@@ -37,6 +37,12 @@ public class IArticleClientFallback implements FallbackFactory<IArticleClient> {
                 log.error("调用 article-updateCommentStatus 服务失败: {} {}", articleId, isComment, cause);
                 return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
             }
+
+            @Override
+            public ResponseResult getNewsDimension(String beginDate, String endDate, Integer id) {
+                log.error("调用 article-getNewsDimension 服务失败: {} {} {}", beginDate, endDate, id, cause);
+                return ResponseResult.errorResult(AppHttpCodeEnum.SERVER_ERROR, "数据获取失败");
+            }
         };
     }
 }

@@ -1,13 +1,21 @@
 package com.heima.article.feign;
 
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.heima.apis.article.IArticleClient;
 import com.heima.article.service.ApArticleConfigService;
 import com.heima.article.service.ApArticleService;
 import com.heima.model.article.dtos.ArticleDto;
+import com.heima.model.article.pojos.ApArticle;
 import com.heima.model.article.pojos.ApArticleConfig;
 import com.heima.model.common.dtos.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class ArticleClient implements IArticleClient {
@@ -49,5 +57,35 @@ public class ArticleClient implements IArticleClient {
                 .set(ApArticleConfig::getIsComment, isComment)
                 .update();
         return ResponseResult.okResult(null);
+    }
+
+    @Override
+    @GetMapping("/api/v1/article/newsDimension")
+    public ResponseResult getNewsDimension(@RequestParam(value = "beginDate", required = false) String beginDate,
+                                           @RequestParam(value = "endDate", required = false) String endDate,
+                                           @RequestParam("id") Integer id) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        LambdaQueryChainWrapper<ApArticle> wrapper = apArticleService.lambdaQuery()
+                .eq(ApArticle::getAuthorId, id);
+
+        if (beginDate != null && !beginDate.isEmpty()) {
+            wrapper.ge(ApArticle::getPublishTime, sdf.parse(beginDate));
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            wrapper.le(ApArticle::getPublishTime, sdf.parse(endDate));
+        }
+
+        // 统计发布量
+        Long publishNum = Long.valueOf(wrapper.count());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("publishNum", publishNum.intValue());
+        result.put("likesNum", 0);
+        result.put("collectNum", 0);
+        result.put("readNum", 0);
+        result.put("commentNum", 0);
+
+        return ResponseResult.okResult(result);
     }
 }
