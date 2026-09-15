@@ -25,7 +25,17 @@ public enum AppHttpCodeEnum {
     DATA_NOT_EXIST(1002,"数据不存在"),
     // 数据错误 3000~3500
     NO_OPERATOR_AUTH(3000,"无权限操作"),
-    NEED_ADMIND(3001,"需要管理员权限");
+    NEED_ADMIND(3001,"需要管理员权限"),
+
+    //自媒体文章错误 3501-3600
+    MATERIAL_REFERENCE_FAIL(3501,"素材引用失败"),
+    ARTICLE_COUNT_ERROR(3502,"该频道下存在文章，不能删除"),
+
+    // 自媒体频道
+    CHANNEL_DATA_NOT_EXIST(3601,"自媒体频道数据不存在"),
+    CHANNEL_DATA_EXIST(3602,"自媒体频道数据存在"),
+    CHANNEL_DATA_NOT_DELETE(3603,"自媒体频道数据不能删除");
+
 
     int code;
     String errorMessage;

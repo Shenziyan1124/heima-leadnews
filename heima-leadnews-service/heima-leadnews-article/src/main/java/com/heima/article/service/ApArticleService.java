@@ -1,0 +1,61 @@
+package com.heima.article.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.heima.model.article.dtos.ArticleBehaviorDto;
+import com.heima.model.article.dtos.ArticleDto;
+import com.heima.model.article.dtos.ArticleHomeDto;
+import com.heima.model.article.pojos.ApArticle;
+import com.heima.model.common.dtos.ResponseResult;
+import com.heima.model.mess.ArticleVisitStreamMess;
+import org.springframework.web.bind.annotation.RequestBody;
+
+public interface ApArticleService extends IService<ApArticle> {
+    /**
+     * 加载文章列表
+     * @param dto
+     * @param type 1 加载更多 2 加载最新
+     * @return
+     */
+    public ResponseResult loadArticleList(ArticleHomeDto dto, Short type);
+
+
+    /**
+     * 加载文章列表
+     * @param dto
+     * @param type 1 加载更多 2 加载最新
+     *        firstPage true:查询第一页 false:查询非第一页
+     * @return
+     */
+    public ResponseResult loadArticleList2(ArticleHomeDto dto, Short type,Boolean firstPage);
+
+    /**
+     * 保存app端相关文章
+     * @param dto
+     * @return
+     */
+
+    ResponseResult saveArticle(ArticleDto dto);
+
+    /**
+     * 根据频道id获取文章数量
+     * @param id
+     * @return
+     */
+    ResponseResult getArticleCountByChannelId(Integer id);
+
+    /**
+     * 加载文章行为,判断当前用户是否已经关注该文章的作者、是否收藏了此文章、是否点赞了文章、是否不喜欢该文章等
+     * @param dto
+     * @return
+     */
+    ResponseResult loadArticleBehavior(ArticleBehaviorDto dto);
+
+
+
+    /**
+     * 更新文章的分值  同时更新缓存中的热点文章数据
+     * @param mess
+     */
+    public void updateScore(ArticleVisitStreamMess mess);
+
+}

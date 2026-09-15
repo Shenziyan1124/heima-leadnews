@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.heima.article.mapper.ApArticleMapper">
+
+    <resultMap id="resultMap" type="com.heima.model.article.pojos.ApArticle">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="authorId" column="author_id"/>
+        <result property="authorName" column="author_name"/>
+        <result property="channelId" column="channel_id"/>
+        <result property="channelName" column="channel_name"/>
+        <result property="layout" column="layout"/>
+        <result property="flag" column="flag"/>
+        <result property="images" column="images"/>
+        <result property="labels" column="labels"/>
+        <result property="likes" column="likes"/>
+        <result property="collection" column="collection"/>
+        <result property="comment" column="comment"/>
+        <result property="views" column="views"/>
+        <result property="provinceId" column="province_id"/>
+        <result property="cityId" column="city_id"/>
+        <result property="countyId" column="county_id"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="syncStatus" column="sync_status"/>
+        <result property="origin" column="origin"/>
+        <result property="staticUrl" column="static_url"/>
+    </resultMap>
+
+    <select id="loadArticleList" resultMap="resultMap">
+        SELECT aa.* FROM ap_article aa left join ap_article_config aac ON aa.id = aac.article_id
+        <where>
+            and aac.is_down != 1
+            and aac.is_delete != 1
+
+            # 加载更多
+            <if test="type != null and type == 1">
+                and aa.publish_time <![CDATA[<]]> #{dto.minBehotTime}
+            </if>
+
+            # 加载最新
+            <if test="type != null and type == 2">
+                and aa.publish_time <![CDATA[>]]> #{dto.maxBehotTime}
+            </if>
+
+            <if test="dto.tag != null and dto.tag != '__all__'">
+                and aa.channel_id = #{dto.tag}
+            </if>
+        </where>
+        order by aa.publish_time desc
+        limit #{dto.size}
+    </select>
+
+
+    <select id="findArticleListByLast5days" resultMap="resultMap">
+        SELECT aa.* FROM ap_article aa left join ap_article_config aac ON aa.id = aac.article_id
+        <where>
+            and aac.is_down != 1
+            and aac.is_delete != 1
+        </where>
+        <if test="dayParam != null">
+            and aa.publish_time <![CDATA[>=]]> #{dayParam}
+        </if>
+    </select>
+</mapper>

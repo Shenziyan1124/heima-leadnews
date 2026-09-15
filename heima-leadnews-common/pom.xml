@@ -13,6 +13,14 @@
     <name>heima-leadnews-common</name>
 
     <dependencies>
+
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+
+
         <dependency>
             <groupId>com.heima</groupId>
             <artifactId>heima-leadnews-utils</artifactId>

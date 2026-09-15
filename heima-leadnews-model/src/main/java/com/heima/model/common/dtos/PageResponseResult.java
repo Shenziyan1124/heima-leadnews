@@ -14,7 +14,9 @@ public class PageResponseResult extends ResponseResult implements Serializable {
     }
 
     public PageResponseResult() {
-
+        this.currentPage = 0;
+        this.size = 0;
+        this.total = 0;
     }
 
 

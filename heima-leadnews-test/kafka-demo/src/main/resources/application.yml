@@ -1,0 +1,18 @@
+server:
+  port: 9991
+spring:
+  application:
+    name: kafka-demo
+  kafka:
+    bootstrap-servers: 192.168.200.130:9092 # Kafka服务器地址
+    producer:
+      retries: 10  # 重试次数
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # key序列化器
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer  # value序列化器
+    consumer:
+      group-id: ${spring.application.name}-test  # 消费者组ID
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # key反序列化器
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # value反序列化器
+kafka:
+  hosts: 192.168.200.130:9092
+  group: ${spring.application.name}

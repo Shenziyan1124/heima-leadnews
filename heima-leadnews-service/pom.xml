@@ -10,10 +10,18 @@
     <packaging>pom</packaging>
     <modules>
         <module>heima-leadnews-user</module>
+        <module>heima-leadnews-article</module>
+        <module>heima-leadnews-wemedia</module>
+        <module>heima-leadnews-schedule</module>
+        <module>heima-leadnews-search</module>
+        <module>heima-leadnews-admin</module>
+        <module>heima-leadnews-behavior</module>
+        <module>heima-leadnews-comment</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>heima-leadnews-service</artifactId>
+
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
