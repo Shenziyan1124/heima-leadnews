@@ -30,18 +30,34 @@ public class ArticleClient implements IArticleClient {
     @Autowired
     private ApArticleConfigService apArticleConfigService;
 
+    /**
+     * 保存文章
+     * @param dto
+     * @return
+     */
     @Override
     @PostMapping("/api/v1/article/save")
     public ResponseResult saveArticle(@RequestBody ArticleDto dto) {
         return apArticleService.saveArticle(dto);
     }
 
+    /**
+     * 根据频道id获取文章数量
+     * @param id
+     * @return
+     */
     @Override
     @GetMapping("/api/v1/article/channel/{id}/count")
     public ResponseResult getArticleCountByChannelId(@PathVariable("id") Integer id) {
         return apArticleService.getArticleCountByChannelId(id);
     }
 
+
+    /**
+     * 根据文章id获取文章评论状态
+     * @param articleId
+     * @return
+     */
     @Override
     @GetMapping("/api/v1/article/comment_status/{articleId}")
     public ResponseResult getCommentStatus(@PathVariable("articleId") Long articleId) {
@@ -54,6 +70,12 @@ public class ArticleClient implements IArticleClient {
         return ResponseResult.okResult(true);
     }
 
+    /**
+     * 更新文章评论状态
+     * @param articleId
+     * @param isComment
+     * @return
+     */
     @Override
     @PostMapping("/api/v1/article/comment_status")
     public ResponseResult updateCommentStatus(@RequestParam("articleId") Long articleId, @RequestParam("isComment") Boolean isComment) {
@@ -64,6 +86,15 @@ public class ArticleClient implements IArticleClient {
         return ResponseResult.okResult(null);
     }
 
+
+    /**
+     * 获取作者数据维度
+     * @param beginDate
+     * @param endDate
+     * @param id
+     * @return
+     * @throws ParseException
+     */
     @Override
     @GetMapping("/api/v1/article/newsDimension")
     public ResponseResult getNewsDimension(@RequestParam(value = "beginDate", required = false) String beginDate,
